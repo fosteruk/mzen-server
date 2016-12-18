@@ -1,0 +1,21 @@
+{
+  "name": "mzen-server",
+  "version": "0.1.0",
+  "description": "mZen Server",
+  "main": "lib/server",
+  "scripts": {
+    "test": "mocha ./test/*"
+  },
+  "author": "Kevin Foster <kevin.foster.uk@gmail.com>",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "bcrypt": "^1.0.1",
+    "body-parser": "^1.15.2",
+    "clone": "^1.0.2",
+    "express": "^4.14.0",
+    "mocha": "^2.5.3",
+    "rewire": "^2.5.1",
+    "should": "^8.4.0",
+    "sinon": "^1.17.4"
+  }
+}
