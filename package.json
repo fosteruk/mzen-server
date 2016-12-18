@@ -1,6 +1,6 @@
 {
   "name": "mzen-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "mZen Server",
   "main": "lib/server",
   "scripts": {
@@ -8,6 +8,10 @@
   },
   "author": "Kevin Foster <kevin.foster.uk@gmail.com>",
   "license": "BSD-3-Clause",
+  "repository" : { 
+    "type" : "git", 
+    "url" : "https://github.com/kevin-foster/mZen-Server.git"
+  },
   "dependencies": {
     "bcrypt": "^1.0.1",
     "body-parser": "^1.15.2",
