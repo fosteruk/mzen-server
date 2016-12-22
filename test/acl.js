@@ -287,4 +287,32 @@ describe('ServerAcl', function(){
       should(rules).eql(expectedRules);
     });
   });
+  describe('setRepos()', function(){
+    it('injects repos into role assessors', function(){
+      class AclAssessorTeamMember extends ServerAclRoleAssessor 
+      {
+        constructor() {super('team-member');}
+      }
+      
+      class AclAssessorAdmin extends ServerAclRoleAssessor 
+      {
+        constructor() {super('admin');}
+      }
+      
+      var repos = {
+        teamMember: [],
+        admin: []
+      };
+      
+      var acl = new ServerAcl();
+      var assessorTeamMember = new AclAssessorTeamMember;
+      var assessorAdmin = new AclAssessorAdmin;
+      acl.addRoleAssessor(assessorTeamMember);
+      acl.addRoleAssessor(assessorAdmin);
+      acl.setRepos(repos);
+      
+      should(assessorTeamMember.repos).eql(repos);
+      should(assessorAdmin.repos).eql(repos);
+    });
+  });
 });
