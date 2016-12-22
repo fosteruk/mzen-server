@@ -57,6 +57,34 @@ describe('ServerAcl', function(){
         done(err);
       });
     });
+    it('checks static role assignments in user.acl.roles if role assessor not defined', function(done){
+      var aclContext = {
+        user: {
+          name: 'Kevin',
+          acl: {
+            roles: ['supervisor']
+          }
+        }
+      };
+      
+      var promises = [];
+      
+      var aclTrue = new ServerAcl();
+      promises.push(aclTrue.hasRole('supervisor', aclContext).then(function(hasRole){
+        should(hasRole).eql(true);
+      }));
+      
+      var aclFalse = new ServerAcl();
+      promises.push(aclFalse.hasRole('ceo').then(function(hasRole){
+        should(hasRole).eql(false);
+      }));
+      
+      Promise.all(promises).then(function(){
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
     it('role accessor evaluates context', function(done){
       var config = {
         rules: [
