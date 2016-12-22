@@ -262,7 +262,7 @@ describe('ServerAcl', function(){
       
       should(rules).eql(config.endpoints['post-getAll'].acl.rules);
     });
-    it('returns named endpoint rules with gloabl rules prepended', function(){
+    it('returns named endpoint rules with global rules prepended', function(){
       var config = {
         rules: [
           {allow: false, role: 'guest'},
