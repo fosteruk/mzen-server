@@ -228,6 +228,63 @@ describe('ServerAcl', function(){
         done(err);
       });
     });
-    
+  });
+  describe('getRules()', function(){
+    it('returns global rules', function(){
+      var config = {
+        rules: [
+          {allow: false, role: 'guest'},
+          {allow: true, role: 'admin'}
+        ]
+      };
+      
+      var acl = new ServerAcl(config);
+      var rules = acl.getRules();
+      
+      should(rules).eql(config.rules);
+    });
+    it('returns named endpoint rules', function(){
+      var config = {
+        endpoints: {
+          'post-getAll': {
+            acl: {
+              rules: [
+                {role: 'authed'},
+                {role: 'admin'},
+              ]
+            }
+          }
+        }
+      };
+      
+      var acl = new ServerAcl(config);
+      var rules = acl.getRules('post-getAll');
+      
+      should(rules).eql(config.endpoints['post-getAll'].acl.rules);
+    });
+    it('returns named endpoint rules with gloabl rules prepended', function(){
+      var config = {
+        rules: [
+          {allow: false, role: 'guest'},
+          {allow: true, role: 'admin'}
+        ],
+        endpoints: {
+          'post-getAll': {
+            acl: {
+              rules: [
+                {role: 'authed'},
+                {role: 'admin'},
+              ]
+            }
+          }
+        }
+      };
+      
+      var acl = new ServerAcl(config);
+      var rules = acl.getRules('post-getAll');
+      
+      var expectedRules = config.rules.concat(config.endpoints['post-getAll'].acl.rules);
+      should(rules).eql(expectedRules);
+    });
   });
 });
