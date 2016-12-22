@@ -26,13 +26,13 @@ describe('ServerAcl', function(){
       class TestAssessorTrue extends ServerAclRoleAssessor 
       {
         constructor() {super('admin');}
-        hasRole(user, context) {return Promise.resolve(true);}
+        hasRole(context) {return Promise.resolve(true);}
       }
       
       class TestAssessorFalse extends ServerAclRoleAssessor 
       {
         constructor() {super('admin');}
-        hasRole(user, context) {return Promise.resolve(false);}
+        hasRole(context) {return Promise.resolve(false);}
       }
       
       var promises = [];
@@ -67,12 +67,12 @@ describe('ServerAcl', function(){
       class TestAssessor extends ServerAclRoleAssessor 
       {
         constructor() {super('admin');}
-        hasRole(user, context) {return Promise.resolve(context.adminPassword == 'qwerty');}
+        hasRole(context) {return Promise.resolve(context.adminPassword == 'qwerty');}
       }
 
       var acl = new ServerAcl(config);
       acl.addRoleAssessor(new TestAssessor);
-      acl.hasRole('admin', null, {adminPassword: 'qwerty'}).then(function(hasRole){
+      acl.hasRole('admin', {adminPassword: 'qwerty'}).then(function(hasRole){
         should(hasRole).eql(true);
         done();
       });
@@ -122,19 +122,19 @@ describe('ServerAcl', function(){
       class AclAssessorGuest extends ServerAclRoleAssessor 
       {
         constructor() {super('guest');}
-        hasRole(user, context) {return Promise.resolve(true);}
+        hasRole(context) {return Promise.resolve(true);}
       }
       
       class AclAssessorAdmin extends ServerAclRoleAssessor 
       {
         constructor() {super('admin');}
-        hasRole(user, context) {return Promise.resolve(true);}
+        hasRole(context) {return Promise.resolve(true);}
       }
       
       class AclAssessorPublic extends ServerAclRoleAssessor 
       {
         constructor() {super('public');}
-        hasRole(user, context) {return Promise.resolve(true);}
+        hasRole(context) {return Promise.resolve(true);}
       }
       
       var acl = new ServerAcl(config);
