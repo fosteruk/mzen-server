@@ -148,5 +148,86 @@ describe('ServerAcl', function(){
         done(err);
       });
     });
+    it('returns conditions object if role specifies conditions', function(done){
+      var config = {
+        rules: [
+          {allow: true, role: 'all'},
+          {allow: false, role: 'guest'},
+          {allow: true, role: 'admin'},
+          {allow: false, role: 'public'},
+        ]
+      };
+      
+      var conditions = {isAdmin: 1};
+      
+      class AclAssessorGuest extends ServerAclRoleAssessor 
+      {
+        constructor() {super('guest');}
+        hasRole(context) {return Promise.resolve(true);}
+      }
+      
+      class AclAssessorAdmin extends ServerAclRoleAssessor 
+      {
+        constructor() {super('admin');}
+        hasRole(context) {
+          return Promise.resolve(conditions);
+        }
+      }
+      
+      
+      var acl = new ServerAcl(config);
+      acl.addRoleAssessor(new AclAssessorGuest);
+      acl.addRoleAssessor(new AclAssessorAdmin);
+      acl.isPermitted('guest').then(function(permitted){
+        should(permitted).eql(conditions);
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+  });
+  describe('populateContext()', function(){
+    it('populates context object from each role assessor initContext()', function(done){
+      var config = {
+        rules: [
+          {allow: false, role: 'guest'},
+          {allow: true, role: 'admin'}
+        ]
+      };
+      
+      var conditions = {isAdmin: 1};
+      
+      class AclAssessorGuest extends ServerAclRoleAssessor 
+      {
+        constructor() {super('guest');}
+        initContext(request, context) {
+          context['guest'] = 'guest condition';
+          return Promise.resolve();
+        }
+      }
+      
+      class AclAssessorAdmin extends ServerAclRoleAssessor 
+      {
+        constructor() {super('admin');}
+        initContext(request, context) {
+          context['admin'] = 'admin condition';
+          return Promise.resolve();
+        }
+      }
+      
+      var finalContext = {};
+      
+      var acl = new ServerAcl(config);
+      acl.addRoleAssessor(new AclAssessorGuest);
+      acl.addRoleAssessor(new AclAssessorAdmin);
+      acl.populateContext({}, finalContext).then(function(conditions){
+        should(finalContext.admin).eql('admin condition');
+        should(finalContext.guest).eql('guest condition');
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    
   });
 });

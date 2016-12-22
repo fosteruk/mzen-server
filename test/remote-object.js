@@ -732,6 +732,7 @@ describe('ServerRemoteObject', function(){
       var acl = new ServerAcl({
         endpoints: config.endpoints
       });
+      acl.loadDefaultRoleAssessors();
       
       var remoteObject = new ServerRemoteObject(targetObject, config);
       remoteObject.setAcl(acl);
