@@ -1,6 +1,7 @@
 'use strict'
 var should = require('should');
 var ServerRemoteObject = require('../lib/remote-object');
+var ServerAcl = require('../lib/acl');
 var ExpressMockRequest = require('./express/mock-request');
 var ExpressMockResponse = require('./express/mock-response');
 
@@ -699,6 +700,88 @@ describe('ServerRemoteObject', function(){
       var resSave = new ExpressMockResponse;
       middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
         should(resSave.data).eql('Kevin');
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    it('returns 401 unauthorized if not permitted by ACL', function(done){
+      var targetObject = {
+        getAll: function(){
+          return Promise.resolve();
+        }
+      };
+      
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [],
+            acl: {
+              rules: [
+                {allow: false, role: 'all'}
+              ]
+            }
+          }
+        }
+      };
+      
+      var acl = new ServerAcl({
+        endpoints: config.endpoints
+      });
+      
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      remoteObject.setAcl(acl);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+      
+      var req = new ExpressMockRequest;
+      var res = new ExpressMockResponse;
+      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+        should(res.code).eql(401);
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    it('executes remote method if ACL permits', function(done){
+      var targetObject = {
+        getAll: function(){
+          return Promise.resolve('success');
+        }
+      };
+      
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [],
+            acl: {
+              rules: [
+                {allow: true, role: 'all'}
+              ]
+            }
+          }
+        }
+      };
+      
+      var acl = new ServerAcl({
+        endpoints: config.endpoints
+      });
+      
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      remoteObject.setAcl(acl);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+      
+      var req = new ExpressMockRequest;
+      var res = new ExpressMockResponse;
+      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+        should(res.data).eql('success');
         done();
       }).catch(function(err){
         done(err);
