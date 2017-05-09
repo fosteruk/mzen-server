@@ -20,7 +20,7 @@
     "express": "^4.14.0",
     "merge": "^1.2.0",
     "mocha": "^2.5.3",
-    "mzen-schema": "^0.0.1",
+    "mzen-schema": "^0.0.13",
     "rewire": "^2.5.1",
     "should": "^8.4.0",
     "sinon": "^1.17.4"
