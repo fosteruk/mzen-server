@@ -133,7 +133,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured body-field as argument to remote method', function(done){
+    it('injects configured bodyField as argument to remote method', function(done){
       var targetObject = {
         save: function(content){
           return Promise.resolve(content);
@@ -148,7 +148,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'content', src: 'body-field'}
+              {srcName: 'content', src: 'bodyField'}
             ]
           }
         }
@@ -166,7 +166,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured body-field as field on argument to remote method', function(done){
+    it('injects configured bodyField as field on argument to remote method', function(done){
       var targetObject = {
         save: function(data){
           return Promise.resolve(data.theBodyField);
@@ -181,7 +181,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: { 
-              theBodyField: {srcName: 'content', src: 'body-field'}
+              theBodyField: {srcName: 'content', src: 'bodyField'}
             }
           }
         }
@@ -265,7 +265,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured query-field as argument to remote method', function(done){
+    it('injects configured queryField as argument to remote method', function(done){
       var targetObject = {
         getAll: function(offset){
           return Promise.resolve(offset);
@@ -280,7 +280,7 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcName: 'offset', src: 'query-field'}
+              {srcName: 'offset', src: 'queryField'}
             ]
           }
         }
@@ -585,11 +585,11 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'stringToNumber', type: Number, src: 'body-field'},
-              {srcName: 'stringToBooleanTrue', type: Boolean, src: 'body-field'},
-              {srcName: 'stringToBooleanFalse', type: Boolean, src: 'body-field'},
-              {srcName: 'stringToDate', type: Date, src: 'body-field'},
-              {srcName: 'stringToObjectId', type: 'ObjectID', src: 'body-field'}
+              {srcName: 'stringToNumber', type: Number, src: 'bodyField'},
+              {srcName: 'stringToBooleanTrue', type: Boolean, src: 'bodyField'},
+              {srcName: 'stringToBooleanFalse', type: Boolean, src: 'bodyField'},
+              {srcName: 'stringToDate', type: Date, src: 'bodyField'},
+              {srcName: 'stringToObjectId', type: 'ObjectID', src: 'bodyField'}
             ]
           }
         }
@@ -635,7 +635,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body-field', required: true},
+              {srcName: 'name', type: String, src: 'bodyField', required: true},
             ]
           }
         }
@@ -679,7 +679,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body-field', notNull: true},
+              {srcName: 'name', type: String, src: 'bodyField', notNull: true},
             ]
           }
         }
@@ -723,7 +723,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body-field', defaultValue: 'Kevin'},
+              {srcName: 'name', type: String, src: 'bodyField', defaultValue: 'Kevin'},
             ]
           }
         }
@@ -756,7 +756,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body-field', defaultValue: 'Kevin'},
+              {srcName: 'name', type: String, src: 'bodyField', defaultValue: 'Kevin'},
             ]
           }
         }
