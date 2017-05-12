@@ -61,7 +61,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured body into remote method', function(done){
+    it('injects configured body as argument to remote method', function(done){
       var targetObject = {
         save: function(requestBody){
           return Promise.resolve(requestBody);
@@ -97,7 +97,43 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured body-field into remote method', function(done){
+    it('injects configured body as field on argument to remote method', function(done){
+      var targetObject = {
+        save: function(data){
+          return Promise.resolve(data.theBody);
+        }
+      };
+      
+      var config = {
+        path: '/api',
+        endpoints: {
+          'post-save': {
+            path: '/save',
+            method: 'save',
+            verbs: ['post'],
+            args: {
+              theBody: {src: 'body'}
+            }
+          }
+        }
+      };
+      
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+
+      should(middlewareConfigs['post-save']['post']['verb']).eql('post');
+      should(middlewareConfigs['post-save']['post']['path']).eql('/api/save');
+      
+      var reqSave = new ExpressMockRequest({body: 'post body'});
+      var resSave = new ExpressMockResponse;
+      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+        should(resSave.data).eql('post body');
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    it('injects configured body-field as argument to remote method', function(done){
       var targetObject = {
         save: function(content){
           return Promise.resolve(content);
@@ -130,7 +166,40 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured param into remote method', function(done){
+    it('injects configured body-field as field on argument to remote method', function(done){
+      var targetObject = {
+        save: function(data){
+          return Promise.resolve(data.theBodyField);
+        }
+      };
+      
+      var config = {
+        path: '/api',
+        endpoints: {
+          'post-save': {
+            path: '/save',
+            method: 'save',
+            verbs: ['post'],
+            args: { 
+              theBodyField: {srcName: 'content', src: 'body-field'}
+            }
+          }
+        }
+      };
+      
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+      
+      var reqSave = new ExpressMockRequest({body: {content: 'content value'}});
+      var resSave = new ExpressMockResponse;
+      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+        should(resSave.data).eql('content value');
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    it('injects configured param as argument to remote method', function(done){
       var targetObject = {
         getByPkey: function(pkey){
           return Promise.resolve(pkey);
@@ -163,7 +232,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured params into remote method', function(done){
+    it('injects configured params as argument to remote method', function(done){
       var targetObject = {
         getByPkey: function(params){
           return Promise.resolve(params);
@@ -196,7 +265,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured query-field into remote method', function(done){
+    it('injects configured query-field as argument to remote method', function(done){
       var targetObject = {
         getAll: function(offset){
           return Promise.resolve(offset);
@@ -229,7 +298,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured query into remote method', function(done){
+    it('injects configured query as argument to remote method', function(done){
       var targetObject = {
         getAll: function(query){
           return Promise.resolve(query);
@@ -262,7 +331,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured request into remote method', function(done){
+    it('injects configured request as argument to remote method', function(done){
       var targetObject = {
         getAll: function(request){
           return Promise.resolve(request);
@@ -295,7 +364,7 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured response into remote method', function(done){
+    it('injects configured response as argument to remote method', function(done){
       var targetObject = {
         getAll: function(response){
           return Promise.resolve(response);
@@ -783,6 +852,112 @@ describe('ServerRemoteObject', function(){
       var res = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
         should(res.data).eql('success');
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    it('injects acl-context into callack method', function(done){
+      var targetObject = {
+        getAll: function(aclContext){
+          return Promise.resolve(aclContext);
+        }
+      };
+      
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [
+              {srcName: 'acl-context'},
+            ],
+            acl: {
+              rules: [
+                {allow: true, role: 'all'}
+              ]
+            }
+          }
+        }
+      };
+
+      var mockRoleAssessor = {
+        role: 'user',
+        initContext: function(request, context) {
+          context['user'] = {id: '123'};
+          return Promise.resolve();
+        }
+      };
+      
+      var acl = new ServerAcl({
+        endpoints: config.endpoints
+      });
+      acl.addRoleAssessor(mockRoleAssessor);
+      
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      remoteObject.setAcl(acl);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+      
+      var req = new ExpressMockRequest;
+      var res = new ExpressMockResponse;
+      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+        should(res.data.user.id).eql('123');
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    it('injects acl-conditions into callack method', function(done){
+      var targetObject = {
+        getAll: function(aclConditions){
+          return Promise.resolve(aclConditions);
+        }
+      };
+      
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [
+              {srcName: 'acl-conditions'},
+            ],
+            acl: {
+              rules: [
+                {allow: true, role: 'user'}
+              ]
+            }
+          }
+        }
+      };
+
+      var mockRoleAssessor = {
+        role: 'user',
+        initContext: function(request, context) {
+          return Promise.resolve();
+        },
+        hasRole: function(context) {
+          return Promise.resolve({userId: '123'});
+        }
+      };
+      
+      var acl = new ServerAcl({
+        endpoints: config.endpoints
+      });
+      acl.addRoleAssessor(mockRoleAssessor);
+      
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      remoteObject.setAcl(acl);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+      
+      var req = new ExpressMockRequest;
+      var res = new ExpressMockResponse;
+      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+        should(res.data.userId).eql('123');
         done();
       }).catch(function(err){
         done(err);
