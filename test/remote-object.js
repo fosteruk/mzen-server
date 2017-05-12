@@ -857,8 +857,9 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects acl-context into callack method', function(done){
+    it('injects aclContext into callack method', function(done){
       var targetObject = {
+        // aclContext and aclConditions are always appended as arguments - they are no configurable as with requestArgs
         getAll: function(aclContext){
           return Promise.resolve(aclContext);
         }
@@ -871,9 +872,7 @@ describe('ServerRemoteObject', function(){
             path: '/',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {srcName: 'acl-context'},
-            ],
+            args: [],
             acl: {
               rules: [
                 {allow: true, role: 'all'}
@@ -909,9 +908,10 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects acl-conditions into callack method', function(done){
+    it('injects aclConditions into callack method', function(done){
       var targetObject = {
-        getAll: function(aclConditions){
+        // aclContext and aclConditions are always appended as arguments - they are no configurable as with requestArgs
+        getAll: function(aclContext, aclConditions){
           return Promise.resolve(aclConditions);
         }
       };
@@ -923,9 +923,7 @@ describe('ServerRemoteObject', function(){
             path: '/',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {srcName: 'acl-conditions'},
-            ],
+            args: [],
             acl: {
               rules: [
                 {allow: true, role: 'user'}
