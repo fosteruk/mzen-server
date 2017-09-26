@@ -2,7 +2,7 @@
   "name": "mzen-server",
   "version": "0.1.27",
   "description": "mZen Server",
-  "main": "lib/server",
+  "main": "index",
   "scripts": {
     "test": "mocha ./test/*"
   },
