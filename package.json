@@ -1,6 +1,6 @@
 {
   "name": "mzen-server",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "mZen Server",
   "main": "lib/index",
   "scripts": {
