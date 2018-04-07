@@ -148,7 +148,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'content', src: 'body'}
+              {srcKey: 'content', src: 'body'}
             ]
           }
         }
@@ -181,7 +181,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: {
-              thebody: {srcName: 'content', src: 'body'}
+              thebody: {srcKey: 'content', src: 'body'}
             }
           }
         }
@@ -214,7 +214,7 @@ describe('ServerRemoteObject', function(){
             method: 'getByPkey',
             verbs: ['get'],
             args: [
-              {srcName: 'pkey', src: 'param'}
+              {srcKey: 'pkey', src: 'param'}
             ]
           }
         }
@@ -280,7 +280,7 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcName: 'offset', src: 'query'}
+              {srcKey: 'offset', src: 'query'}
             ]
           }
         }
@@ -379,7 +379,7 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcName: 'query', src: 'request'}
+              {srcKey: 'query', src: 'request'}
             ]
           }
         }
@@ -445,7 +445,7 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcName: 'test', src: 'response'}
+              {srcKey: 'test', src: 'response'}
             ]
           }
         }
@@ -652,11 +652,11 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'stringToNumber', type: Number, src: 'body'},
-              {srcName: 'stringToBooleanTrue', type: Boolean, src: 'body'},
-              {srcName: 'stringToBooleanFalse', type: Boolean, src: 'body'},
-              {srcName: 'stringToDate', type: Date, src: 'body'},
-              {srcName: 'stringToObjectId', type: 'ObjectID', src: 'body'}
+              {srcKey: 'stringToNumber', type: Number, src: 'body'},
+              {srcKey: 'stringToBooleanTrue', type: Boolean, src: 'body'},
+              {srcKey: 'stringToBooleanFalse', type: Boolean, src: 'body'},
+              {srcKey: 'stringToDate', type: Date, src: 'body'},
+              {srcKey: 'stringToObjectId', type: 'ObjectID', src: 'body'}
             ]
           }
         }
@@ -702,7 +702,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body', required: true},
+              {srcKey: 'name', type: String, src: 'body', required: true},
             ]
           }
         }
@@ -746,7 +746,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body', notNull: true},
+              {srcKey: 'name', type: String, src: 'body', notNull: true},
             ]
           }
         }
@@ -790,7 +790,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
+              {srcKey: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
             ]
           }
         }
@@ -823,7 +823,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
+              {srcKey: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
             ]
           }
         }
