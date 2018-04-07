@@ -1,8 +1,8 @@
 'use strict'
 
 class ExpressMockResponse
-{ 
-  construct()
+{
+  construct(data)
   {
     this.data = 'test';
     this.code = 200;

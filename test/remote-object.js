@@ -16,7 +16,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve('getLatest response');
         },
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -32,29 +32,29 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       should(middlewareConfigs['post-save']['post']['verb']).eql('post');
       should(middlewareConfigs['post-save']['post']['path']).eql('/api/save');
       should(middlewareConfigs['get-latest']['get']['verb']).eql('get');
       should(middlewareConfigs['get-latest']['get']['path']).eql('/api/latest');
-      
+
       var promises = [];
-      
+
       var reqSave = new ExpressMockRequest;
       var resSave = new ExpressMockResponse;
       promises.push(middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
         should(resSave.data).eql('save response');
       }));
-      
+
       var reqGetLatest = new ExpressMockRequest;
       var resGetLatest = new ExpressMockResponse;
       promises.push(middlewareConfigs['get-latest']['get']['callback'](reqGetLatest, resGetLatest).then(function(){
         should(resGetLatest.data).eql('getLatest response');
       }));
-      
+
       Promise.all(promises).then(function(){
         done()
       }).catch(function(err){
@@ -67,7 +67,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(requestBody);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -81,13 +81,13 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
       should(middlewareConfigs['post-save']['post']['verb']).eql('post');
       should(middlewareConfigs['post-save']['post']['path']).eql('/api/save');
-      
+
       var reqSave = new ExpressMockRequest({body: 'post body'});
       var resSave = new ExpressMockResponse;
       middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
@@ -103,7 +103,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(data.theBody);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -117,13 +117,13 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
       should(middlewareConfigs['post-save']['post']['verb']).eql('post');
       should(middlewareConfigs['post-save']['post']['path']).eql('/api/save');
-      
+
       var reqSave = new ExpressMockRequest({body: 'post body'});
       var resSave = new ExpressMockResponse;
       middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
@@ -133,13 +133,13 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured bodyField as argument to remote method', function(done){
+    it('injects configured body-field as argument to remote method', function(done){
       var targetObject = {
         save: function(content){
           return Promise.resolve(content);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -148,15 +148,15 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'content', src: 'bodyField'}
+              {srcName: 'content', src: 'body'}
             ]
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqSave = new ExpressMockRequest({body: {content: 'content value'}});
       var resSave = new ExpressMockResponse;
       middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
@@ -166,13 +166,13 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured bodyField as field on argument to remote method', function(done){
+    it('injects configured body-field as field on argument to remote method', function(done){
       var targetObject = {
         save: function(data){
-          return Promise.resolve(data.theBodyField);
+          return Promise.resolve(data.thebody);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -180,16 +180,16 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: { 
-              theBodyField: {srcName: 'content', src: 'bodyField'}
+            args: {
+              thebody: {srcName: 'content', src: 'body'}
             }
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqSave = new ExpressMockRequest({body: {content: 'content value'}});
       var resSave = new ExpressMockResponse;
       middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
@@ -205,7 +205,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(pkey);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -219,7 +219,7 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
@@ -238,7 +238,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(params);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -247,12 +247,12 @@ describe('ServerRemoteObject', function(){
             method: 'getByPkey',
             verbs: ['get'],
             args: [
-              {src: 'params'}
+              {src: 'param'}
             ]
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
@@ -265,13 +265,13 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
-    it('injects configured queryField as argument to remote method', function(done){
+    it('injects configured query-field as argument to remote method', function(done){
       var targetObject = {
         getAll: function(offset){
           return Promise.resolve(offset);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -280,15 +280,15 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcName: 'offset', src: 'queryField'}
+              {srcName: 'offset', src: 'query'}
             ]
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
@@ -304,7 +304,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(query);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -318,10 +318,10 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
@@ -337,7 +337,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(request);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -351,14 +351,47 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
         should(resGetAll.data).eql(reqGetAll);
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
+    it('injects configured request field as argument to remote method', function(done){
+      var targetObject = {
+        getAll: function(query){
+          return Promise.resolve(query);
+        }
+      };
+
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/all',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [
+              {srcName: 'query', src: 'request'}
+            ]
+          }
+        }
+      };
+
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+
+      var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
+      var resGetAll = new ExpressMockResponse;
+      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+        should(resGetAll.data).eql(reqGetAll.query);
         done();
       }).catch(function(err){
         done(err);
@@ -370,7 +403,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(response);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -384,10 +417,10 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
@@ -397,16 +430,50 @@ describe('ServerRemoteObject', function(){
         done(err);
       });
     });
+    it('injects configured response field as argument to remote method', function(done){
+      var targetObject = {
+        getAll: function(test){
+          return Promise.resolve(test);
+        }
+      };
+
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/all',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [
+              {srcName: 'test', src: 'response'}
+            ]
+          }
+        }
+      };
+
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+
+      var reqGetAll = new ExpressMockRequest();
+      var resGetAll = new ExpressMockResponse();
+      resGetAll.test = 'a';
+      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+        should(resGetAll.data).eql('a');
+        done();
+      }).catch(function(err){
+        done(err);
+      });
+    });
     it('returns 200 response code by default', function(done){
       class CustomerErrorValidation extends Error {}
       class CustomerErrorNotFound extends Error {}
-      
+
       var targetObject = {
         save: function(){
           return Promise.resolve('success');
         },
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -417,7 +484,7 @@ describe('ServerRemoteObject', function(){
           },
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
@@ -433,13 +500,13 @@ describe('ServerRemoteObject', function(){
     it('returns configured success response code', function(done){
       class CustomerErrorValidation extends Error {}
       class CustomerErrorNotFound extends Error {}
-      
+
       var targetObject = {
         save: function(){
           return Promise.resolve('success');
         },
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -453,7 +520,7 @@ describe('ServerRemoteObject', function(){
           },
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
@@ -472,7 +539,7 @@ describe('ServerRemoteObject', function(){
           return Promise.reject(new Error('Error message'));
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -483,7 +550,7 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
@@ -499,7 +566,7 @@ describe('ServerRemoteObject', function(){
     it('returns configured error response code', function(done){
       class CustomerErrorValidation extends Error {}
       class CustomerErrorNotFound extends Error {}
-      
+
       var targetObject = {
         save: function(){
           return Promise.reject(new CustomerErrorValidation('403 error message'));
@@ -508,7 +575,7 @@ describe('ServerRemoteObject', function(){
           return Promise.reject(new CustomerErrorNotFound('404 error message'));
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -536,10 +603,10 @@ describe('ServerRemoteObject', function(){
           },
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var promises = [];
 
       var reqSave = new ExpressMockRequest;
@@ -549,7 +616,7 @@ describe('ServerRemoteObject', function(){
       }).catch(function(error){
         should(error).eql('403 error message');
       });
-      
+
       var reqGetOne = new ExpressMockRequest;
       var resGetOne = new ExpressMockResponse;
       middlewareConfigs['get-one']['get']['callback'](reqGetOne, resGetOne).then(function(){
@@ -557,7 +624,7 @@ describe('ServerRemoteObject', function(){
       }).catch(function(error){
         should(error).eql('404 error message');
       });
-      
+
       Promise.all(promises).then(function(){
         done();
       }).catch(function(err){
@@ -576,7 +643,7 @@ describe('ServerRemoteObject', function(){
           });
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -585,19 +652,19 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'stringToNumber', type: Number, src: 'bodyField'},
-              {srcName: 'stringToBooleanTrue', type: Boolean, src: 'bodyField'},
-              {srcName: 'stringToBooleanFalse', type: Boolean, src: 'bodyField'},
-              {srcName: 'stringToDate', type: Date, src: 'bodyField'},
-              {srcName: 'stringToObjectId', type: 'ObjectID', src: 'bodyField'}
+              {srcName: 'stringToNumber', type: Number, src: 'body'},
+              {srcName: 'stringToBooleanTrue', type: Boolean, src: 'body'},
+              {srcName: 'stringToBooleanFalse', type: Boolean, src: 'body'},
+              {srcName: 'stringToDate', type: Date, src: 'body'},
+              {srcName: 'stringToObjectId', type: 'ObjectID', src: 'body'}
             ]
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqSave = new ExpressMockRequest({body: {
         stringToNumber: '456',
         stringToBooleanTrue: '1',
@@ -626,7 +693,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(name);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -635,29 +702,29 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'bodyField', required: true},
+              {srcName: 'name', type: String, src: 'body', required: true},
             ]
           }
         }
       };
-      
+
       var promises = [];
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqSaveFail = new ExpressMockRequest;
       var resSaveFail = new ExpressMockResponse;
       promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveFail, resSaveFail).then(function(){
         should(resSaveFail.code).eql(403);
       }));
-      
+
       var reqSaveSuccess = new ExpressMockRequest({body: {name: 'Kevin'}});
       var resSaveSuccess = new ExpressMockResponse;
       promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveSuccess, resSaveSuccess).then(function(){
         should(resSaveSuccess.data).eql('Kevin');
       }));
-      
+
       Promise.all(promises).then(function(){
         done();
       }).catch(function(err){
@@ -670,7 +737,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(name);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -679,29 +746,29 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'bodyField', notNull: true},
+              {srcName: 'name', type: String, src: 'body', notNull: true},
             ]
           }
         }
       };
-      
+
       var promises = [];
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqSaveFail = new ExpressMockRequest({body: {name: 'NULL'}});
       var resSaveFail = new ExpressMockResponse;
       promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveFail, resSaveFail).then(function(){
         should(resSaveFail.code).eql(403);
       }));
-      
+
       var reqSaveSuccess = new ExpressMockRequest({body: {name: 'Kevin'}});
       var resSaveSuccess = new ExpressMockResponse;
       promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveSuccess, resSaveSuccess).then(function(){
         should(resSaveSuccess.data).eql('Kevin');
       }));
-      
+
       Promise.all(promises).then(function(){
         done();
       }).catch(function(err){
@@ -714,7 +781,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(name);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -723,15 +790,15 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'bodyField', defaultValue: 'Kevin'},
+              {srcName: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
             ]
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqSave = new ExpressMockRequest;
       var resSave = new ExpressMockResponse;
       middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
@@ -747,7 +814,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(name);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -756,15 +823,15 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcName: 'name', type: String, src: 'bodyField', defaultValue: 'Kevin'},
+              {srcName: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
             ]
           }
         }
       };
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var reqSave = new ExpressMockRequest({body: {name: null}});
       var resSave = new ExpressMockResponse;
       middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
@@ -780,7 +847,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve();
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -797,16 +864,16 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var acl = new ServerAcl({
         endpoints: config.endpoints
       });
       acl.loadDefaultRoleAssessors();
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       remoteObject.setAcl(acl);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
@@ -822,7 +889,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve('success');
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -839,15 +906,15 @@ describe('ServerRemoteObject', function(){
           }
         }
       };
-      
+
       var acl = new ServerAcl({
         endpoints: config.endpoints
       });
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       remoteObject.setAcl(acl);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
@@ -864,7 +931,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(aclContext);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -889,16 +956,16 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve();
         }
       };
-      
+
       var acl = new ServerAcl({
         endpoints: config.endpoints
       });
       acl.addRoleAssessor(mockRoleAssessor);
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       remoteObject.setAcl(acl);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
@@ -915,7 +982,7 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve(aclConditions);
         }
       };
-      
+
       var config = {
         path: '/api',
         endpoints: {
@@ -942,16 +1009,16 @@ describe('ServerRemoteObject', function(){
           return Promise.resolve({userId: '123'});
         }
       };
-      
+
       var acl = new ServerAcl({
         endpoints: config.endpoints
       });
       acl.addRoleAssessor(mockRoleAssessor);
-      
+
       var remoteObject = new ServerRemoteObject(targetObject, config);
       remoteObject.setAcl(acl);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
-      
+
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
       middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
