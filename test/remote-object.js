@@ -2,6 +2,7 @@
 var should = require('should');
 var ServerRemoteObject = require('../lib/remote-object');
 var ServerAcl = require('../lib/acl');
+var ServerAclRoleAssessor = require('../lib/acl/role-assessor');
 var ExpressMockRequest = require('./express/mock-request');
 var ExpressMockResponse = require('./express/mock-response');
 
@@ -949,18 +950,17 @@ describe('ServerRemoteObject', function(){
         }
       };
 
-      var mockRoleAssessor = {
-        role: 'user',
-        initContext: function(request, context) {
-          context['user'] = {id: '123'};
-          return Promise.resolve();
+      class MockRoleAssessor extends ServerAclRoleAssessor
+      {
+        async initContext(request, context) {
+          context.user = {id: '123'};
         }
-      };
+      }
 
       var acl = new ServerAcl({
         endpoints: config.endpoints
       });
-      acl.addRoleAssessor(mockRoleAssessor);
+      acl.addRoleAssessor(new MockRoleAssessor('user'));
 
       var remoteObject = new ServerRemoteObject(targetObject, config);
       remoteObject.setAcl(acl);
@@ -1000,20 +1000,17 @@ describe('ServerRemoteObject', function(){
         }
       };
 
-      var mockRoleAssessor = {
-        role: 'user',
-        initContext: function(request, context) {
-          return Promise.resolve();
-        },
-        hasRole: function(context) {
-          return Promise.resolve({userId: '123'});
+      class MockRoleAssessor extends ServerAclRoleAssessor
+      {
+        async hasRole(context) {
+          return {userId: '123'};
         }
-      };
+      }
 
       var acl = new ServerAcl({
         endpoints: config.endpoints
       });
-      acl.addRoleAssessor(mockRoleAssessor);
+      acl.addRoleAssessor(new MockRoleAssessor('user'));
 
       var remoteObject = new ServerRemoteObject(targetObject, config);
       remoteObject.setAcl(acl);

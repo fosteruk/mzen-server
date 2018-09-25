@@ -22,63 +22,35 @@ describe('ServerAcl', function(){
           {role: 'admin'}
         ]
       };
-      
-      class TestAssessorTrue extends ServerAclRoleAssessor 
+
+      class TestAssessorTrue extends ServerAclRoleAssessor
       {
         constructor() {super('admin');}
         hasRole(context) {return Promise.resolve(true);}
       }
-      
-      class TestAssessorFalse extends ServerAclRoleAssessor 
+
+      class TestAssessorFalse extends ServerAclRoleAssessor
       {
         constructor() {super('admin');}
         hasRole(context) {return Promise.resolve(false);}
       }
-      
+
       var promises = [];
-      
+
       // Test that the assessor can return true
       var aclA = new ServerAcl(config);
       aclA.addRoleAssessor(new TestAssessorTrue);
       promises.push(aclA.hasRole('admin').then(function(hasRole){
         should(hasRole).eql(true);
       }));
-      
+
       // Test that the assessor can return false
       var aclB = new ServerAcl(config);
       aclB.addRoleAssessor(new TestAssessorFalse);
       promises.push(aclB.hasRole('admin').then(function(hasRole){
         should(hasRole).eql(false);
       }));
-      
-      Promise.all(promises).then(function(){
-        done();
-      }).catch(function(err){
-        done(err);
-      });
-    });
-    it('checks static role assignments in user.acl.roles if role assessor not defined', function(done){
-      var aclContext = {
-        user: {
-          name: 'Kevin',
-          acl: {
-            roles: ['supervisor']
-          }
-        }
-      };
-      
-      var promises = [];
-      
-      var aclTrue = new ServerAcl();
-      promises.push(aclTrue.hasRole('supervisor', aclContext).then(function(hasRole){
-        should(hasRole).eql(true);
-      }));
-      
-      var aclFalse = new ServerAcl();
-      promises.push(aclFalse.hasRole('ceo').then(function(hasRole){
-        should(hasRole).eql(false);
-      }));
-      
+
       Promise.all(promises).then(function(){
         done();
       }).catch(function(err){
@@ -91,8 +63,8 @@ describe('ServerAcl', function(){
           {role: 'admin'}
         ]
       };
-      
-      class TestAssessor extends ServerAclRoleAssessor 
+
+      class TestAssessor extends ServerAclRoleAssessor
       {
         constructor() {super('admin');}
         hasRole(context) {return Promise.resolve(context.adminPassword == 'qwerty');}
@@ -146,25 +118,25 @@ describe('ServerAcl', function(){
           {allow: false, role: 'public'},
         ]
       };
-      
-      class AclAssessorGuest extends ServerAclRoleAssessor 
+
+      class AclAssessorGuest extends ServerAclRoleAssessor
       {
         constructor() {super('guest');}
         hasRole(context) {return Promise.resolve(true);}
       }
-      
-      class AclAssessorAdmin extends ServerAclRoleAssessor 
+
+      class AclAssessorAdmin extends ServerAclRoleAssessor
       {
         constructor() {super('admin');}
         hasRole(context) {return Promise.resolve(true);}
       }
-      
-      class AclAssessorPublic extends ServerAclRoleAssessor 
+
+      class AclAssessorPublic extends ServerAclRoleAssessor
       {
         constructor() {super('public');}
         hasRole(context) {return Promise.resolve(true);}
       }
-      
+
       var acl = new ServerAcl(config);
       acl.addRoleAssessor(new AclAssessorGuest);
       acl.addRoleAssessor(new AclAssessorAdmin);
@@ -185,24 +157,24 @@ describe('ServerAcl', function(){
           {allow: false, role: 'public'},
         ]
       };
-      
+
       var conditions = {isAdmin: 1};
-      
-      class AclAssessorGuest extends ServerAclRoleAssessor 
+
+      class AclAssessorGuest extends ServerAclRoleAssessor
       {
         constructor() {super('guest');}
         hasRole(context) {return Promise.resolve(true);}
       }
-      
-      class AclAssessorAdmin extends ServerAclRoleAssessor 
+
+      class AclAssessorAdmin extends ServerAclRoleAssessor
       {
         constructor() {super('admin');}
         hasRole(context) {
           return Promise.resolve(conditions);
         }
       }
-      
-      
+
+
       var acl = new ServerAcl(config);
       acl.addRoleAssessor(new AclAssessorGuest);
       acl.addRoleAssessor(new AclAssessorAdmin);
@@ -222,10 +194,10 @@ describe('ServerAcl', function(){
           {allow: true, role: 'admin'}
         ]
       };
-      
+
       var conditions = {isAdmin: 1};
-      
-      class AclAssessorGuest extends ServerAclRoleAssessor 
+
+      class AclAssessorGuest extends ServerAclRoleAssessor
       {
         constructor() {super('guest');}
         initContext(request, context) {
@@ -233,8 +205,8 @@ describe('ServerAcl', function(){
           return Promise.resolve();
         }
       }
-      
-      class AclAssessorAdmin extends ServerAclRoleAssessor 
+
+      class AclAssessorAdmin extends ServerAclRoleAssessor
       {
         constructor() {super('admin');}
         initContext(request, context) {
@@ -242,9 +214,9 @@ describe('ServerAcl', function(){
           return Promise.resolve();
         }
       }
-      
+
       var finalContext = {};
-      
+
       var acl = new ServerAcl(config);
       acl.addRoleAssessor(new AclAssessorGuest);
       acl.addRoleAssessor(new AclAssessorAdmin);
@@ -265,10 +237,10 @@ describe('ServerAcl', function(){
           {allow: true, role: 'admin'}
         ]
       };
-      
+
       var acl = new ServerAcl(config);
       var rules = acl.getRules();
-      
+
       should(rules).eql(config.rules);
     });
     it('returns named endpoint rules', function(){
@@ -284,10 +256,10 @@ describe('ServerAcl', function(){
           }
         }
       };
-      
+
       var acl = new ServerAcl(config);
       var rules = acl.getRules('post-getAll');
-      
+
       should(rules).eql(config.endpoints['post-getAll'].acl.rules);
     });
     it('returns named endpoint rules with global rules prepended', function(){
@@ -307,38 +279,38 @@ describe('ServerAcl', function(){
           }
         }
       };
-      
+
       var acl = new ServerAcl(config);
       var rules = acl.getRules('post-getAll');
-      
+
       var expectedRules = config.rules.concat(config.endpoints['post-getAll'].acl.rules);
       should(rules).eql(expectedRules);
     });
   });
   describe('setRepos()', function(){
     it('injects repos into role assessors', function(){
-      class AclAssessorTeamMember extends ServerAclRoleAssessor 
+      class AclAssessorTeamMember extends ServerAclRoleAssessor
       {
         constructor() {super('team-member');}
       }
-      
-      class AclAssessorAdmin extends ServerAclRoleAssessor 
+
+      class AclAssessorAdmin extends ServerAclRoleAssessor
       {
         constructor() {super('admin');}
       }
-      
+
       var repos = {
         teamMember: [],
         admin: []
       };
-      
+
       var acl = new ServerAcl();
       var assessorTeamMember = new AclAssessorTeamMember;
       var assessorAdmin = new AclAssessorAdmin;
       acl.addRoleAssessor(assessorTeamMember);
       acl.addRoleAssessor(assessorAdmin);
       acl.setRepos(repos);
-      
+
       should(assessorTeamMember.repos).eql(repos);
       should(assessorAdmin.repos).eql(repos);
     });
