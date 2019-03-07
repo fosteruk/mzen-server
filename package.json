@@ -20,11 +20,11 @@
     "rewire": "^2.5.1"
   },
   "dependencies": {
-    "bcrypt": "^2.0.1",
+    "bcrypt": "^3.0.4",
     "body-parser": "^1.15.2",
     "clone": "^1.0.2",
     "express": "^4.16.0",
-    "merge": "^1.2.0",
-    "mzen": "^0.1.67"
+    "merge": "^1.2.1",
+    "mzen": "^0.1.68"
   }
 }
