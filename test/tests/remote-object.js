@@ -1,10 +1,10 @@
 'use strict'
 var should = require('should');
-var ServerRemoteObject = require('../lib/remote-object');
-var ServerAcl = require('../lib/acl');
-var ServerAclRoleAssessor = require('../lib/acl/role-assessor');
-var ExpressMockRequest = require('./express/mock-request');
-var ExpressMockResponse = require('./express/mock-response');
+var ServerRemoteObject = require('../../lib/remote-object');
+var ServerAcl = require('../../lib/acl');
+var ServerAclRoleAssessor = require('../../lib/acl/role-assessor');
+var ExpressMockRequest = require('../fixtures/express/mock-request');
+var ExpressMockResponse = require('../fixtures/express/mock-response');
 
 describe('ServerRemoteObject', function(){
   describe('getMiddlewareConfig()', function(){

@@ -4,7 +4,7 @@
   "description": "mZen Server",
   "main": "lib/index",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha ./test/*"
+    "test": "mocha ./test/tests/*"
   },
   "author": "Kevin Foster <kevin.foster.uk@gmail.com>",
   "license": "BSD-3-Clause",

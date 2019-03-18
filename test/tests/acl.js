@@ -1,8 +1,8 @@
 'use strict'
 var should = require('should');
-var ServerAcl = require('../lib/acl');
-var ServerAclRoleAssessor = require('../lib/acl/role-assessor');
-var ServerAclRoleAssessorAll = require('../lib/acl/role-assessor/all');
+var ServerAcl = require('../../lib/acl');
+var ServerAclRoleAssessor = require('../../lib/acl/role-assessor');
+var ServerAclRoleAssessorAll = require('../../lib/acl/role-assessor/all');
 
 describe('ServerAcl', function(){
   describe('hasRole()', function(){
