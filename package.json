@@ -15,9 +15,7 @@
   },
   "devDependencies": {
     "mocha": "^5.2.0",
-    "should": "^11.2.0",
-    "sinon": "^1.17.4",
-    "rewire": "^2.5.1"
+    "should": "^11.2.0"
   },
   "dependencies": {
     "bcrypt": "^3.0.4",
