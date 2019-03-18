@@ -1,7 +1,6 @@
-'use strict'
-var RoleAssessorAll = require('./acl/role-assessor/all');
+import RoleAssessorAll from './acl/role-assessor/all';
 
-class ServerAcl
+export class ServerAcl
 {
   constructor(options = {})
   {
@@ -153,4 +152,4 @@ endpoints: {
   },
 */
 
-module.exports = ServerAcl;
+export default ServerAcl;

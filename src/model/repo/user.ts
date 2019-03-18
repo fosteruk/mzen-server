@@ -1,10 +1,9 @@
-'use strict'
-var { Repo } = require('mzen');
+import { Repo } from 'mzen';
 var clone = require('clone');
 var bcrypt = require('bcrypt');
 var crypto = require('crypto');
 
-class RepoUser extends Repo
+export class RepoUser extends Repo
 {
   constructor(options = {})
   {
@@ -24,4 +23,4 @@ class RepoUser extends Repo
   }
 }
 
-module.exports = RepoUser;
+export default RepoUser;

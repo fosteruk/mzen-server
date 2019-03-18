@@ -1,6 +1,4 @@
-'use strict'
-
-class ErrorServer extends Error
+export class ErrorServer extends Error
 {
   constructor(data)
   {
@@ -11,7 +9,7 @@ class ErrorServer extends Error
   }
 }
 
-class ErrorInternalServer extends ErrorServer
+export class ErrorInternalServer extends ErrorServer
 {
   constructor(data)
   {
@@ -20,7 +18,7 @@ class ErrorInternalServer extends ErrorServer
   }
 } // 500
 
-class ErrorBadRequest extends ErrorServer
+export class ErrorBadRequest extends ErrorServer
 {
   constructor(data)
   {
@@ -29,7 +27,7 @@ class ErrorBadRequest extends ErrorServer
   }
 } // 400
 
-class ErrorUnauthorized extends ErrorServer
+export class ErrorUnauthorized extends ErrorServer
 {
   constructor(data)
   {
@@ -38,7 +36,7 @@ class ErrorUnauthorized extends ErrorServer
   }
 } // 401
 
-class ErrorForbidden extends ErrorServer
+export class ErrorForbidden extends ErrorServer
 {
   constructor(data)
   {
@@ -47,7 +45,7 @@ class ErrorForbidden extends ErrorServer
   }
 } // 403
 
-class ErrorNotFound extends ErrorServer
+export class ErrorNotFound extends ErrorServer
 {
   constructor(data)
   {
@@ -55,7 +53,7 @@ class ErrorNotFound extends ErrorServer
   }
 } // 404
 
-class ErrorMethodNotAllowed extends ErrorServer
+export class ErrorMethodNotAllowed extends ErrorServer
 {
   constructor(data)
   {
@@ -64,7 +62,7 @@ class ErrorMethodNotAllowed extends ErrorServer
   }
 } // 405
 
-class ErrorTooManyRequests extends ErrorServer
+export class ErrorTooManyRequests extends ErrorServer
 {
   constructor(data)
   {
@@ -73,17 +71,7 @@ class ErrorTooManyRequests extends ErrorServer
   }
 } // 429
 
-module.exports = {
-  ErrorInternalServer,
-  ErrorBadRequest,
-  ErrorUnauthorized,
-  ErrorForbidden,
-  ErrorNotFound,
-  ErrorMethodNotAllowed,
-  ErrorTooManyRequests
-};
-
-module.exports.endpoints = {
+export var endpoints = {
   ErrorInternalServer: {http: {code: 500}},
   ErrorBadRequest: {http: {code: 400}},
   ErrorUnauthorized: {http: {code: 401}},
@@ -92,3 +80,14 @@ module.exports.endpoints = {
   ErrorMethodNotAllowed: {http: {code: 405}},
   ErrorTooManyRequests: {http: {code: 429}}
 };
+
+var errors = {
+  ErrorInternalServer,
+  ErrorBadRequest,
+  ErrorUnauthorized,
+  ErrorForbidden,
+  ErrorNotFound,
+  ErrorMethodNotAllowed,
+  ErrorTooManyRequests
+};
+export default errors;

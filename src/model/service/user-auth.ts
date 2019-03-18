@@ -1,10 +1,9 @@
-'use strict'
-var { Service } = require('mzen');
-var ServerRemoteObject = require('../../remote-object');
-var bcrypt = require('bcrypt');
-var crypto = require('crypto');
+import { Service } from 'mzen';
+import ServerRemoteObject from '../../remote-object';
+import bcrypt = require('bcrypt');
+import crypto = require('crypto');
 
-class ServiceUserAuth extends Service
+export class ServiceUserAuth extends Service
 {
   constructor()
   {
@@ -106,4 +105,4 @@ class ServiceUserAuth extends Service
   }
 }
 
-module.exports = ServiceUserAuth;
+export default ServiceUserAuth;

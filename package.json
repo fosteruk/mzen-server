@@ -4,7 +4,13 @@
   "description": "mZen Server",
   "main": "lib/index",
   "scripts": {
-    "test": "mocha ./test/tests/*"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test",
+    "build": "npm run clean && tsc",
+    "clean": "rm -fr ./lib/*",
+    "test": "mocha -r test/tests/ts-node-hooks.js test/tests/*.ts test/tests/**/*.ts",
+    "test-fixtures-build": "cd ./test/fixtures && tsc",
+    "test-fixtures-clean": "find ./test/fixtures -type f \\( -name '*.js' -or -name '*.js.map' -or -name '*.d.ts' \\) -delete"
   },
   "author": "Kevin Foster <kevin.foster.uk@gmail.com>",
   "license": "BSD-3-Clause",
@@ -14,8 +20,14 @@
     "url": "https://github.com/kevin-foster/mZen-Server.git"
   },
   "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/express": "^4.16.1",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^11.11.3",
     "mocha": "^5.2.0",
-    "should": "^11.2.0"
+    "should": "^11.2.0",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.3.3333"
   },
   "dependencies": {
     "bcrypt": "^3.0.4",
@@ -24,5 +36,10 @@
     "express": "^4.16.0",
     "merge": "^1.2.1",
     "mzen": "^0.1.68"
-  }
+  },
+  "files": [
+    "/lib",
+    "/src",
+    "/tsconfig.json"
+  ]
 }

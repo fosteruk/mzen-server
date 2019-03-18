@@ -1,6 +1,4 @@
-'use strict'
-
-class ServerAclRoleAssessor
+export class ServerAclRoleAssessor
 {
   constructor(role)
   {
@@ -19,4 +17,4 @@ class ServerAclRoleAssessor
   }
 }
 
-module.exports = ServerAclRoleAssessor;
+export default ServerAclRoleAssessor;

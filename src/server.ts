@@ -1,16 +1,14 @@
-'use strict'
+import { ResourceLoader, ModelManager, Repo } from 'mzen';
+import ServerRemoteObject from './remote-object';
+import ServerAcl from './acl';
+import ServerRepoMixin from './repo-mixin';
+import express from 'express';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import clone = require('clone');
+import merge = require('merge');
 
-var { ResourceLoader, ModelManager, Repo } = require('mzen');
-var ServerRemoteObject = require('./remote-object');
-var ServerAcl = require('./acl');
-var ServerRepoMixin = require('./repo-mixin');
-var express = require('express');
-var bodyParser = require('body-parser');
-var clone = require('clone');
-var fs = require('fs');
-var merge = require('merge');
-
-class Server
+export class Server
 {
   constructor(options = {})
   {
@@ -255,4 +253,4 @@ function kebabToCamel(input)
   });
 }
 
-module.exports = Server;
+export default Server;

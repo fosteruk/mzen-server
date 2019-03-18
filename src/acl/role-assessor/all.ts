@@ -1,6 +1,4 @@
-'use strict'
-
-var ServerAclRoleAssessor = require('../role-assessor');
+import ServerAclRoleAssessor from '../role-assessor';
 
 class ServerAclRoleAssessorAll extends ServerAclRoleAssessor
 {
@@ -14,4 +12,4 @@ class ServerAclRoleAssessorAll extends ServerAclRoleAssessor
   }
 }
 
-module.exports = ServerAclRoleAssessorAll;
+export default ServerAclRoleAssessorAll;

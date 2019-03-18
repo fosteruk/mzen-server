@@ -1,11 +1,9 @@
-'use strict'
+import ServerAcl from './acl';
+import { Schema } from 'mzen';
+import errors from './errors';
+import clone = require('clone');
 
-var ServerAcl = require('./acl');
-var { Schema } = require('mzen');
-var clone = require('clone');
-var errors = require('./errors');
-
-class ServerRemoteObject
+export class ServerRemoteObject
 {
   constructor(object, config = {})
   {
@@ -285,4 +283,4 @@ class ServerRemoteObject
 ServerRemoteObject.error = errors;
 ServerRemoteObject.endpointError = errors.endpoints;
 
-module.exports = ServerRemoteObject;
+export default ServerRemoteObject;

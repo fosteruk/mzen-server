@@ -1,11 +1,9 @@
-'use strict'
+import { Repo, Schema } from 'mzen';
+import clone = require('clone');
 
-var { Repo, Schema } = require('mzen');
-var clone = require('clone');
+export class ServerErrorRepoNotFound extends Error {}
 
-class ServerErrorRepoNotFound extends Error {}
-
-class ServerRepoMixin
+export class ServerRepoMixin
 {
   _find(requestQuery, aclConditions)
   {
@@ -304,4 +302,4 @@ ServerRepoMixin.endpoints =
   }
 };
 
-module.exports = ServerRepoMixin;
+export default ServerRepoMixin;
