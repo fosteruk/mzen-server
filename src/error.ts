@@ -1,6 +1,6 @@
 export class ErrorServer extends Error
 {
-  constructor(data)
+  constructor(data?)
   {
     super();
     data = typeof data == 'string' ? {message: data} : data;
@@ -11,7 +11,7 @@ export class ErrorServer extends Error
 
 export class ErrorInternalServer extends ErrorServer
 {
-  constructor(data)
+  constructor(data?)
   {
     super(data);
     this.name = 'ErrorInternalServer';
@@ -20,7 +20,7 @@ export class ErrorInternalServer extends ErrorServer
 
 export class ErrorBadRequest extends ErrorServer
 {
-  constructor(data)
+  constructor(data?)
   {
     super(data);
     this.name = 'ErrorBadRequest';
@@ -29,7 +29,7 @@ export class ErrorBadRequest extends ErrorServer
 
 export class ErrorUnauthorized extends ErrorServer
 {
-  constructor(data)
+  constructor(data?)
   {
     super(data);
     this.name = 'ErrorUnauthorized';
@@ -38,7 +38,7 @@ export class ErrorUnauthorized extends ErrorServer
 
 export class ErrorForbidden extends ErrorServer
 {
-  constructor(data)
+  constructor(data?)
   {
     super(data);
     this.name = 'ErrorForbidden';
@@ -47,15 +47,16 @@ export class ErrorForbidden extends ErrorServer
 
 export class ErrorNotFound extends ErrorServer
 {
-  constructor(data)
+  constructor(data?)
   {
+    super(data);
     this.name = 'ErrorNotFound';
   }
 } // 404
 
 export class ErrorMethodNotAllowed extends ErrorServer
 {
-  constructor(data)
+  constructor(data?)
   {
     super(data);
     this.name = 'ErrorMethodNotAllowed';
@@ -64,7 +65,7 @@ export class ErrorMethodNotAllowed extends ErrorServer
 
 export class ErrorTooManyRequests extends ErrorServer
 {
-  constructor(data)
+  constructor(data?)
   {
     super(data);
     this.name = 'ErrorTooManyRequests';
@@ -81,7 +82,7 @@ export var endpoints = {
   ErrorTooManyRequests: {http: {code: 429}}
 };
 
-var errors = {
+export var error = {
   ErrorInternalServer,
   ErrorBadRequest,
   ErrorUnauthorized,
@@ -90,4 +91,5 @@ var errors = {
   ErrorMethodNotAllowed,
   ErrorTooManyRequests
 };
-export default errors;
+
+export default error;

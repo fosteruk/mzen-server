@@ -1,16 +1,24 @@
-export class ServerAclRoleAssessor
+export class ServerAclRoleAssessor 
 {
-  constructor(role)
+  role: string;
+  repos: {[key: string]: any};
+  
+  constructor(role?)
   {
     this.role = role ? role : '';
     this.repos = {};
   }
-  async initContext(request, context)
+  
+  // @ts-ignore - 'request' is declared but its value is never read
+  async initContext(request, context?)
   {
   }
-  async hasRole(user, context)
+  
+  // @ts-ignore - 'user' is declared but its value is never read. 
+  async hasRole(user, context?)
   {
   }
+  
   setRepos(repos)
   {
     this.repos = repos;

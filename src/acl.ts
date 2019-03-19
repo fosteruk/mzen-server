@@ -1,20 +1,32 @@
 import RoleAssessorAll from './acl/role-assessor/all';
 
+export interface ServerAclConfig
+{
+  rules?: any;
+  endpoints?: any;
+}
+
 export class ServerAcl
 {
-  constructor(options = {})
+  config: ServerAclConfig;
+  roleAssessor: {[key: string]: any};
+  repos: {[key: string]: any};
+  
+  constructor(options?: ServerAclConfig)
   {
-    this.config = options;
+    this.config = options ? options : {};
     this.config.rules = this.config.rules ? this.config.rules : [];
     this.config.endpoints = this.config.endpoints ? this.config.endpoints : {};
 
     this.roleAssessor = {};
   }
+  
   loadDefaultRoleAssessors()
   {
     this.addRoleAssessor(new RoleAssessorAll);
   }
-  populateContext(request, context)
+  
+  populateContext(request, context?)
   {
     // Initialise assessors
     var promises = [];
@@ -23,7 +35,8 @@ export class ServerAcl
     }
     return Promise.all(promises);
   }
-  isPermitted(endpointName, context)
+  
+  isPermitted(endpointName, context?)
   {
     endpointName = endpointName ? endpointName : '';
     context = context ? context : {};
@@ -31,7 +44,7 @@ export class ServerAcl
     // We append the end point rules to the global rules as the endpoint rules should override the global rules
     var rules = this.getRules(endpointName);
 
-    // We need to execute hasRole() for each rule in squence so we will start with a resolved promise
+    // We need to execute hasRole() for each rule in sequence so we will start with a resolved promise
     // By default everything is permitted so we resolve true
     var promise = Promise.resolve(true);
     rules.forEach((rule) => {
@@ -72,7 +85,8 @@ export class ServerAcl
 
     return promise;
   }
-  hasRole(role, context)
+  
+  hasRole(role: string, context?): any | boolean
   {
     // If a role assessor has been defined for this role we delegate
     var promise = Promise.resolve(false);
@@ -82,6 +96,7 @@ export class ServerAcl
     }
     return promise;
   }
+  
   addRule(rule)
   {
     if (Array.isArray(rule)) {
@@ -90,6 +105,7 @@ export class ServerAcl
       this.config.rules.push(rule);
     }
   }
+  
   getRules(endpointName)
   {
     const globalRules = this.config.rules ? this.config.rules : [];
@@ -102,6 +118,7 @@ export class ServerAcl
 
     return rules;
   }
+  
   setRepos(repos)
   {
     for (var role in this.roleAssessor) {
@@ -109,11 +126,13 @@ export class ServerAcl
     }
     this.repos = repos;
   }
+  
   addRoleAssessor(assessor)
   {
     this.roleAssessor[assessor.role] = assessor;
     this.roleAssessor[assessor.role].setRepos(this.repos);
   }
+  
 }
 /*
 acl: {

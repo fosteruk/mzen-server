@@ -1,19 +1,35 @@
-import { ResourceLoader, ModelManager, Repo } from 'mzen';
+import { ResourceLoader, ModelManager, ModelManagerConfig } from 'mzen';
 import ServerRemoteObject from './remote-object';
 import ServerAcl from './acl';
-import ServerRepoMixin from './repo-mixin';
-import express from 'express';
-import bodyParser from 'body-parser';
-import fs from 'fs';
-import clone = require('clone');
-import merge = require('merge');
+import Http = require('http');
+import express = require('express');
+import bodyParser = require('body-parser');
+import fs = require('fs');
+
+export interface ServerConfig
+{
+  path?: string;
+  port?: number;
+  appDir?: string;
+  initDirName?: string;
+  aclDirName?: string;
+  model?: ModelManagerConfig 
+}
 
 export class Server
 {
-  constructor(options = {})
+  modelManager: ModelManager;
+  config: ServerConfig;
+  app: express.Application;
+  server: Http.Server;
+  router: express.Router;
+  aclRoleAssessor: {[key: string]: any};
+  logger: any;
+  
+  constructor(options?: ServerConfig)
   {
-    this.modelManager = new ModelManager(options.model);
     this.config = options ? options : {};
+    this.modelManager = new ModelManager(options.model);
     this.config.path = this.config.path ? this.config.path : '/api';
     this.config.port = this.config.port ? this.config.port : 3838;
     // Default appDir directory is the same directory as the executed script
@@ -25,6 +41,7 @@ export class Server
     this.server = null;
     this.router = express.Router();
     this.aclRoleAssessor = {};
+    this.modelManager = null;
     this.setLogger(console);
   }
   setLogger(logger)
@@ -142,13 +159,6 @@ export class Server
   }
   registerRepoApiEndpoints()
   {
-    // Mixin ServerRepoMixin methods into Repo - handlers for the api endpoints
-    const mixinFields = Object.getOwnPropertyNames(ServerRepoMixin.prototype);
-    mixinFields.forEach(function(mixinField){
-      if (mixinField == 'constructor') return;
-      Repo.prototype[mixinField] = ServerRepoMixin.prototype[mixinField];
-    });
-
     const repos = this.modelManager.repos;
 
     for (var repoName in repos)
@@ -161,18 +171,6 @@ export class Server
       var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
 
       if (!enable) continue;
-
-      // Append default endpoints to endpoint config
-      for (var defaultEndpointName in ServerRepoMixin.endpoints) {
-        if (endpointsDisable[endpointName] != true) {
-          if (endpoints[defaultEndpointName]) {
-            // The repo already has this endpoint config - merge the two configs
-            endpoints[defaultEndpointName] = merge(ServerRepoMixin.endpoints[defaultEndpointName], endpoints[defaultEndpointName]);
-          } else {
-            endpoints[defaultEndpointName] = ServerRepoMixin.endpoints[defaultEndpointName];
-          }
-        }
-      }
 
       // Remove any enpoints that have been disabled
       for (var endpointName in endpoints) {
@@ -219,7 +217,8 @@ export class Server
     this.app.use(this.config.path, this.router);
     this.app.use((err, req, res, next) => {
       this.logger.error({err, req, res});
-      res.status(500).send('Something broke!')
+      res.status(500).send('Something broke!');
+      next();
     });
     this.server = this.app.listen(this.config.port, () => {
       this.logger.info('Listening on port ' + this.config.port);
@@ -244,13 +243,6 @@ export class Server
 function camelToKebab(input)
 {
   return input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-}
-
-function kebabToCamel(input)
-{
-  return input.replace(/-([a-z])/g, function (g) {
-      return g[1].toUpperCase();
-  });
 }
 
 export default Server;

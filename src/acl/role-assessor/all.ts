@@ -2,11 +2,13 @@ import ServerAclRoleAssessor from '../role-assessor';
 
 class ServerAclRoleAssessorAll extends ServerAclRoleAssessor
 {
-  constructor(role)
+  constructor()
   {
     super('all');
   }
-  async hasRole(user, context)
+  
+  // @ts-ignore - 'user' is declared but its value is never read. 
+  async hasRole(user, context?)
   {
     return true;
   }

@@ -1,11 +1,36 @@
 import ServerAcl from './acl';
-import { Schema } from 'mzen';
-import errors from './errors';
+import { Schema, SchemaValidationResult } from 'mzen';
+import { ErrorServer, ErrorUnauthorized } from './error';
+import { ServerConfigApiAcl, ServerConfigApiEndpoint, ServerConfigApiEndpointResponse, ServerConfigApiEndpointResponseError } from './config-api';
 import clone = require('clone');
+
+export var errorEndpointResponses = {
+  ErrorInternalServer: {http: {code: 500}},
+  ErrorBadRequest: {http: {code: 400}},
+  ErrorUnauthorized: {http: {code: 401}},
+  ErrorForbidden: {http: {code: 403}},
+  ErrorNotFound: {http: {code: 404}},
+  ErrorMethodNotAllowed: {http: {code: 405}},
+  ErrorTooManyRequests: {http: {code: 429}}
+} as {[key: string]: ServerConfigApiEndpointResponse};
+
+export interface ServerRemoteObjectConfig
+{
+  path?: string;
+  acl?: ServerConfigApiAcl;
+  endpoints?: {[key: string]: ServerConfigApiEndpoint};
+}
 
 export class ServerRemoteObject
 {
-  constructor(object, config = {})
+  static error: {[key: string]: ErrorServer};
+  
+  config: ServerRemoteObjectConfig;
+  object: any;
+  acl: ServerAcl;
+  logger: any;
+   
+  constructor(object, config?)
   {
     this.config = config ? config : {};
     this.config.path = this.config.path ? this.config.path : '';
@@ -15,14 +40,15 @@ export class ServerRemoteObject
 
     this.object = object;
     this.acl = new ServerAcl;
-    this.server = null;
     this.setLogger(console);
   }
+  
   setLogger(logger)
   {
     this.logger = logger;
     return this;
   }
+  
   initRouter(router)
   {
     const middlewareConfig = this.getMiddlewareConfig();
@@ -33,10 +59,12 @@ export class ServerRemoteObject
       }
     }
   }
+  
   setAcl(acl)
   {
     this.acl = acl;
   }
+  
   getMiddlewareConfig()
   {
     let middleware = {};
@@ -52,10 +80,9 @@ export class ServerRemoteObject
       const response = endpointConfig.response ? endpointConfig.response : {};
       const responseSuccess = response.success ? response.success: {};
       const responseErrorConfig = response.error ? response.error: {};
-      let responseError = ServerRemoteObject.endpointError;
       // Append configured error handlers to default error handlers
       for (var errorName in responseErrorConfig) {
-        responseError[errorName] = responseErrorConfig[errorName];
+        errorEndpointResponses[errorName] = responseErrorConfig[errorName];
       }
 
       verbs.forEach((verb) => {
@@ -74,7 +101,7 @@ export class ServerRemoteObject
                 return this.acl.isPermitted(endpointName, aclContext);
               }).then((isPermitted) => {
                 if (isPermitted === false) {
-                  throw new errors.ErrorUnauthorized();
+                  throw new ErrorUnauthorized();
                 }
 
                 // Append the aclContext and aclConditions to the requestArgs
@@ -100,17 +127,17 @@ export class ServerRemoteObject
               }).catch((error) => {
                 var errorContent = error.content ? error : 'Error!';
                 var errorHandled = false;
-                if (Object.keys(responseError).length) {
-                  for (var errorName in responseError) {
+                if (Object.keys(errorEndpointResponses).length) {
+                  for (var errorName in errorEndpointResponses) {
                     if (errorName !== error.constructor.name) continue;
 
-                    const errorConfig = responseError[errorName];
+                    const errorConfig = errorEndpointResponses[errorName] as ServerConfigApiEndpointResponseError;
                     const schemaConfig = errorConfig.schema ? errorConfig.schema : null;
                     const httpConfig = errorConfig.http ? errorConfig.http: {};
                     const code = httpConfig.code ? httpConfig.code : 400;
                     const contentType = httpConfig.contentType ? httpConfig.contentType : 'json';
 
-                    let errorValidatePromise = Promise.resolve({isValid: true});
+                    let errorValidatePromise = Promise.resolve({isValid: true} as SchemaValidationResult);
                     if (schemaConfig) {
                       let schema = new Schema(errorContent);
                       errorValidatePromise = schema.validate(error);
@@ -162,6 +189,7 @@ export class ServerRemoteObject
     }
     return middleware;
   }
+  
   buildMethodArgArray(methodArgsConfigArray, requestArgs)
   {
     var args = [];
@@ -175,7 +203,8 @@ export class ServerRemoteObject
     if (requestArgs.aclConditions) args.push(requestArgs.aclConditions);
     return args;
   }
-  parseValidationSpec(methodArgsConfig, req)
+  
+  parseValidationSpec(methodArgsConfig)
   {
     var spec = {};
 
@@ -206,11 +235,12 @@ export class ServerRemoteObject
 
     return spec;
   }
-  parseRequestArgs(methodArgsConfig, req, res)
+  
+  parseRequestArgs(methodArgsConfig, req, res): {[key: string]: any}
   {
     var values = {};
     if (Array.isArray(methodArgsConfig)) {
-      methodArgsConfig.forEach((argConfig, methodArgIndex) => {
+      methodArgsConfig.forEach(argConfig => {
         // First attempt to retrieve the value for the argument
         const src = argConfig.src ? argConfig.src : null;
         const srcKey = argConfig.srcKey ? argConfig.srcKey : src;
@@ -224,12 +254,12 @@ export class ServerRemoteObject
     }
     return values;
   }
+  
   parseOneRequestArg(methodArgConfig, req, res)
   {
     var value = undefined;
     const src = methodArgConfig.src ? methodArgConfig.src : 'query';
     const srcKey = methodArgConfig.srcKey ? methodArgConfig.srcKey : null;
-    const name = methodArgConfig.name ? methodArgConfig.name : srcKey;
 
     req = req ? req : {};
     res = res ? res : {};
@@ -259,10 +289,17 @@ export class ServerRemoteObject
       case 'response':
         value = srcKey ? res[srcKey] : res;
       break;
+      case 'aclContext':
+        value = srcKey ? aclContext[srcKey] : aclContext;
+      break;
+      case 'aclConditions':
+        value = srcKey ? aclConditions[srcKey] : aclConditions;
+      break;
     }
 
     return value;
   }
+  
   requestMin(req)
   {
     var result = {
@@ -279,8 +316,5 @@ export class ServerRemoteObject
     return result;
   }
 }
-
-ServerRemoteObject.error = errors;
-ServerRemoteObject.endpointError = errors.endpoints;
 
 export default ServerRemoteObject;
