@@ -1,4 +1,4 @@
-import { ResourceLoader, ModelManager, ModelManagerConfig } from 'mzen';
+import { ResourceLoader, ModelManager } from 'mzen';
 import ServerRemoteObject from './remote-object';
 import ServerAcl from './acl';
 import Http = require('http');
@@ -13,7 +13,7 @@ export interface ServerConfig
   appDir?: string;
   initDirName?: string;
   aclDirName?: string;
-  model?: ModelManagerConfig 
+  model?: ModelManager 
 }
 
 export class Server
@@ -29,19 +29,19 @@ export class Server
   constructor(options?: ServerConfig)
   {
     this.config = options ? options : {};
-    this.modelManager = new ModelManager(options.model);
     this.config.path = this.config.path ? this.config.path : '/api';
     this.config.port = this.config.port ? this.config.port : 3838;
     // Default appDir directory is the same directory as the executed script
     this.config.appDir = this.config.appDir ? this.config.appDir : '';
     this.config.initDirName = this.config.initDirName ? this.config.initDirName : '/init';
     this.config.aclDirName = this.config.aclDirName ? this.config.aclDirName : '/acl';
+    
+    this.modelManager = this.config.model;
 
     this.app = express();
     this.server = null;
     this.router = express.Router();
     this.aclRoleAssessor = {};
-    this.modelManager = null;
     this.setLogger(console);
   }
   setLogger(logger)

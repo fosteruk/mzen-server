@@ -1,9 +1,9 @@
 'use strict'
 
-var ModelManager = require('mzen/lib/model-manager');
-var Repo = require('mzen/lib/repo');
-var Service = require('mzen/lib/service');
-var Server = require('mzen-server');
+var ModelManager = require('mzen').default;
+var Repo = require('../lib/repo').default;
+var Service = require('../lib/service').default;
+var Server = require('../lib/server').default;
 
 var data = {
   person: [
@@ -249,7 +249,7 @@ class ArtistContactService extends Service
 }
 modelManager.addService(new ArtistContactService);
 
-var server = new Server(modelManager);
+var server = new Server({model: modelManager});
 server.init().then(function(){
   server.start();
 }).then(function(){;
