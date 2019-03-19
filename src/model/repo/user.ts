@@ -1,12 +1,8 @@
-'use strict'
-var { Repo } = require('mzen');
-var clone = require('clone');
-var bcrypt = require('bcrypt');
-var crypto = require('crypto');
+import ServerRepo from '../../repo';
 
-class RepoUser extends Repo
+export class RepoUser extends ServerRepo
 {
-  constructor(options = {})
+  constructor()
   {
     super({
       name: 'user',
@@ -18,10 +14,10 @@ class RepoUser extends Repo
         created: {$type: Date, $filter: {defaultValue: 'now'}}
       },
       api: {
-        disableEndpointGroups: {read: true}
+        endpointGroupsDisable: {read: true}
       }
     });
   }
 }
 
-module.exports = RepoUser;
+export default RepoUser;

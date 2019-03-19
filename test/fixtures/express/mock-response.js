@@ -1,27 +1,23 @@
-'use strict'
-
-class ExpressMockResponse
-{
-  construct(data)
-  {
-    this.data = 'test';
-    this.code = 200;
-  }
-  json(data)
-  {
-    this.send(data);
-    return this;
-  };
-  send(data)
-  {
-    this.data = data;
-    return this;
-  }
-  status(code)
-  {
-    this.code = code;
-    return this;
-  }
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class ExpressMockResponse {
+    construct() {
+        this.mockData = null;
+        this.mockCode = 200;
+    }
+    json(data) {
+        this.send(data);
+        return this;
+    }
+    ;
+    send(data) {
+        this.mockData = data;
+        return this;
+    }
+    status(code) {
+        this.mockCode = code;
+        return this;
+    }
 }
-
-module.exports = ExpressMockResponse;
+exports.ExpressMockResponse = ExpressMockResponse;
+exports.default = ExpressMockResponse;

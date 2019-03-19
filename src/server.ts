@@ -1,20 +1,33 @@
-'use strict'
+import { ResourceLoader, ModelManager } from 'mzen';
+import ServerRemoteObject from './remote-object';
+import ServerAcl from './acl';
+import Http = require('http');
+import express = require('express');
+import bodyParser = require('body-parser');
+import fs = require('fs');
 
-var { ResourceLoader, ModelManager, Repo } = require('mzen');
-var ServerRemoteObject = require('./remote-object');
-var ServerAcl = require('./acl');
-var ServerRepoMixin = require('./repo-mixin');
-var express = require('express');
-var bodyParser = require('body-parser');
-var clone = require('clone');
-var fs = require('fs');
-var merge = require('merge');
-
-class Server
+export interface ServerConfig
 {
-  constructor(options = {})
+  path?: string;
+  port?: number;
+  appDir?: string;
+  initDirName?: string;
+  aclDirName?: string;
+  model?: ModelManager 
+}
+
+export class Server
+{
+  modelManager: ModelManager;
+  config: ServerConfig;
+  app: express.Application;
+  server: Http.Server;
+  router: express.Router;
+  aclRoleAssessor: {[key: string]: any};
+  logger: any;
+  
+  constructor(options?: ServerConfig)
   {
-    this.modelManager = new ModelManager(options.model);
     this.config = options ? options : {};
     this.config.path = this.config.path ? this.config.path : '/api';
     this.config.port = this.config.port ? this.config.port : 3838;
@@ -22,6 +35,8 @@ class Server
     this.config.appDir = this.config.appDir ? this.config.appDir : '';
     this.config.initDirName = this.config.initDirName ? this.config.initDirName : '/init';
     this.config.aclDirName = this.config.aclDirName ? this.config.aclDirName : '/acl';
+    
+    this.modelManager = this.config.model;
 
     this.app = express();
     this.server = null;
@@ -144,13 +159,6 @@ class Server
   }
   registerRepoApiEndpoints()
   {
-    // Mixin ServerRepoMixin methods into Repo - handlers for the api endpoints
-    const mixinFields = Object.getOwnPropertyNames(ServerRepoMixin.prototype);
-    mixinFields.forEach(function(mixinField){
-      if (mixinField == 'constructor') return;
-      Repo.prototype[mixinField] = ServerRepoMixin.prototype[mixinField];
-    });
-
     const repos = this.modelManager.repos;
 
     for (var repoName in repos)
@@ -163,18 +171,6 @@ class Server
       var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
 
       if (!enable) continue;
-
-      // Append default endpoints to endpoint config
-      for (var defaultEndpointName in ServerRepoMixin.endpoints) {
-        if (endpointsDisable[endpointName] != true) {
-          if (endpoints[defaultEndpointName]) {
-            // The repo already has this endpoint config - merge the two configs
-            endpoints[defaultEndpointName] = merge(ServerRepoMixin.endpoints[defaultEndpointName], endpoints[defaultEndpointName]);
-          } else {
-            endpoints[defaultEndpointName] = ServerRepoMixin.endpoints[defaultEndpointName];
-          }
-        }
-      }
 
       // Remove any enpoints that have been disabled
       for (var endpointName in endpoints) {
@@ -221,7 +217,8 @@ class Server
     this.app.use(this.config.path, this.router);
     this.app.use((err, req, res, next) => {
       this.logger.error({err, req, res});
-      res.status(500).send('Something broke!')
+      res.status(500).send('Something broke!');
+      next();
     });
     this.server = this.app.listen(this.config.port, () => {
       this.logger.info('Listening on port ' + this.config.port);
@@ -248,11 +245,4 @@ function camelToKebab(input)
   return input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
-function kebabToCamel(input)
-{
-  return input.replace(/-([a-z])/g, function (g) {
-      return g[1].toUpperCase();
-  });
-}
-
-module.exports = Server;
+export default Server;
