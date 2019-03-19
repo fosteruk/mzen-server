@@ -10,13 +10,14 @@ export class ServerAclRoleAssessor
   }
   
   // @ts-ignore - 'request' is declared but its value is never read
-  async initContext(request, context?)
+  async initContext(request, context?): Promise<any>
   {
   }
   
   // @ts-ignore - 'user' is declared but its value is never read. 
-  async hasRole(user, context?)
+  async hasRole(context): Promise<any | boolean>
   {
+    return Promise.resolve(true);
   }
   
   setRepos(repos)

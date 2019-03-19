@@ -1,8 +1,14 @@
 import RoleAssessorAll from './acl/role-assessor/all';
 
+export interface ServerAclConfigRule
+{
+  allow?: boolean; 
+  role?: string;
+}
+
 export interface ServerAclConfig
 {
-  rules?: any;
+  rules?: Array<ServerAclConfigRule>;
   endpoints?: any;
 }
 
@@ -86,7 +92,7 @@ export class ServerAcl
     return promise;
   }
   
-  hasRole(role: string, context?): any | boolean
+  hasRole(role: string, context?): Promise<any | boolean>
   {
     // If a role assessor has been defined for this role we delegate
     var promise = Promise.resolve(false);
