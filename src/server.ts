@@ -168,7 +168,7 @@ export class Server
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
       const endpointsDisable = apiConfig.endpointsDisable ? apiConfig.endpointsDisable : {};
       const endpointGroupsDisable = apiConfig.endpointGroupsDisable ? apiConfig.endpointGroupsDisable : {};
-      var endpoints = apiConfig.endpoints ? {...repoEndpointsConfigDefault, ...apiConfig.endpoints} : repoEndpointsConfigDefault;
+      var endpoints = apiConfig.endpoints ? {...apiConfig.endpoints, ...repoEndpointsConfigDefault} : repoEndpointsConfigDefault;
 
       if (!enable) continue;
 
