@@ -15,6 +15,12 @@ export class ServerRepo extends Repo
   
   constructor(options?: ServerRepoConfig)
   {
+    options = options ? options : {};
+    options.api = options.api ? options.api : {};
+    options.api.endpoints =
+      options.api.endpoints ? 
+      {...endpointsConfigDefault, ...options.api.endpoints} : endpointsConfigDefault;
+    
     super(options);
   }
   
@@ -142,5 +148,191 @@ export class ServerRepo extends Repo
     return result;
   }
 }
+
+const endpointsConfigDefault =
+{
+  _getFind: {
+    path: '/',
+    method: '_find',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'requestQuery', src: 'query'},
+      {src: 'acl-conditions'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100 // low priority ensures custom endpoints are registered before default ones and so take precedence
+  },
+  _getFindOne: {
+    path: '/find-one',
+    method: '_findOne',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'requestQuery', src: 'query'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100
+  },
+  _getCount: {
+    path: '/count',
+    method: '_count',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'requestQuery', src: 'query'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100
+  },
+  _getFindByPkey: {
+    path: '/:pkey',
+    method: '_findByPkey',
+    verbs: ['get', 'head'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'pkey', src: 'param', type: 'ObjectID'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}},
+        ServerErrorRepoNotFound: {http: {code: 404}}
+      }
+    },
+    priority: -100
+  },
+  _getExistsByPkey: {
+    path: '/:pkey/exists',
+    method: '_existsByPkey',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'pkey', src: 'param'},
+      {srcName: 'requestQuery', src: 'query-root'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}},
+        ServerErrorRepoNotFound: {http: {code: 404}}
+      }
+    },
+    priority: -100
+  },
+  _headExistsByPkey: {
+    path: '/:pkey',
+    method: '_existsByPkey',
+    verbs: ['head'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'pkey', src: 'param'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}},
+        ServerErrorRepoNotFound: {http: {code: 404}}
+      }
+    },
+    priority: -100
+  },
+  _putUpsertOne: {
+    path: '/',
+    method: '_upsertOne',
+    verbs: ['put'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100
+  },
+  _putUpdateOneByPkey: {
+    path: '/:pkey',
+    method: '_updateOneByPkey',
+    verbs: ['put'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'pkey', src: 'path-param'},
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100
+  },
+  _postInsert: {
+    path: '/',
+    method: '_insert',
+    verbs: ['post'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100
+  },
+  _postUpdateOne: {
+    path: '/update',
+    method: '_updateOne',
+    verbs: ['post'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100
+  },
+  _deleteOneByPkey: {
+    path: '/:pkey',
+    method: '_deleteOneByPkey',
+    verbs: ['delete'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'pkey', src: 'param'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    priority: -100
+  }
+};
 
 export default ServerRepo;

@@ -41,6 +41,7 @@ export interface ServerConfigApiEndpoint
   verbs?: Array<string>;
   args?: Array<ServerConfigApiEndpointArg>;
   acl?: ServerConfigApiAcl;
+  priority?: number,
   response?: {
     success?: ServerConfigApiEndpointResponse,
     error?: {[key: string]: ServerConfigApiEndpointResponseError}

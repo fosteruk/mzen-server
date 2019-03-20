@@ -51,13 +51,10 @@ export class ServerRemoteObject
   
   initRouter(router)
   {
-    const middlewareConfig = this.getMiddlewareConfig();
-    for (let endpointName in middlewareConfig) {
-      for (let verb in middlewareConfig[endpointName]) {
-        const endpointConfig = middlewareConfig[endpointName][verb];
-        router[endpointConfig.verb](endpointConfig.path, endpointConfig.callback);
-      }
-    }
+    const middlewareConfigs = this.getMiddlewareConfig();
+    middlewareConfigs.forEach(middlewareConfig => {
+      router[middlewareConfig.verb](middlewareConfig.path, middlewareConfig.callback);
+    });
   }
   
   setAcl(acl)
@@ -67,7 +64,7 @@ export class ServerRemoteObject
   
   getMiddlewareConfig()
   {
-    let middleware = {};
+    let middleware = [];
 
     for (let endpointName in this.config.endpoints)
     {
@@ -76,6 +73,7 @@ export class ServerRemoteObject
       const method = endpointConfig.method ? endpointConfig.method : '';
       const path = endpointConfig.path ? endpointConfig.path : method;
       const methodArgsConfig = endpointConfig.args ? endpointConfig.args : [];
+      const priority = endpointConfig.priority != undefined ? endpointConfig.priority : 0;
 
       const response = endpointConfig.response ? endpointConfig.response : {};
       const responseSuccess = response.success ? response.success: {};
@@ -178,16 +176,18 @@ export class ServerRemoteObject
           });
         };
 
-        if (middleware[endpointName] == undefined) middleware[endpointName] = {};
-        middleware[endpointName][verb] = {
+
+        middleware.push({
           endpointName: endpointName,
+          method: method,
           verb: verb,
           path: this.config.path + path,
-          callback: middlewareCallback
-        };
+          callback: middlewareCallback,
+          priority: priority
+        });
       });
     }
-    return middleware;
+    return middleware.sort((a, b) => b.priority - a.priority);
   }
   
   buildMethodArgArray(methodArgsConfigArray, requestArgs)

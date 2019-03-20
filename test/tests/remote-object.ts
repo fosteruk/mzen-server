@@ -36,22 +36,22 @@ describe('ServerRemoteObject', function(){
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
-      should(middlewareConfigs['post-save']['post']['verb']).eql('post');
-      should(middlewareConfigs['post-save']['post']['path']).eql('/api/save');
-      should(middlewareConfigs['get-latest']['get']['verb']).eql('get');
-      should(middlewareConfigs['get-latest']['get']['path']).eql('/api/latest');
+      should(middlewareConfigs[0].verb).eql('post');
+      should(middlewareConfigs[0].path).eql('/api/save');
+      should(middlewareConfigs[1].verb).eql('get');
+      should(middlewareConfigs[1].path).eql('/api/latest');
 
       var promises = [];
 
       var reqSave = new ExpressMockRequest;
       var resSave = new ExpressMockResponse;
-      promises.push(middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      promises.push(middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData).eql('save response');
       }));
 
       var reqGetLatest = new ExpressMockRequest;
       var resGetLatest = new ExpressMockResponse;
-      promises.push(middlewareConfigs['get-latest']['get']['callback'](reqGetLatest, resGetLatest).then(function(){
+      promises.push(middlewareConfigs[1].callback(reqGetLatest, resGetLatest).then(function(){
         should(resGetLatest.mockData).eql('getLatest response');
       }));
 
@@ -60,6 +60,46 @@ describe('ServerRemoteObject', function(){
       }).catch(function(err){
         done(err);
       });
+    });
+    it('generates middleware array ordered by priority', function(){
+      var config = {
+        path: '/api',
+        endpoints: {
+          'a': {
+            path: '/a',
+            method: 'a',
+            verbs: ['post'],
+            priority: 10
+          },
+          'b': {
+            path: '/b',
+            method: 'b',
+            verbs: ['get'],
+            priority: -1000
+          },
+          'c': {
+            path: '/c',
+            method: 'c',
+            verbs: ['get'],
+            priority: 90
+          },
+          'd': {
+            path: '/d',
+            method: 'd',
+            verbs: ['get'],
+            priority: 100
+          }
+        }
+      };
+
+      var remoteObject = new ServerRemoteObject({}, config);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+
+      should(Array.isArray(middlewareConfigs)).eql(true);
+      should(middlewareConfigs[0].method).eql('d');
+      should(middlewareConfigs[1].method).eql('c');
+      should(middlewareConfigs[2].method).eql('a');
+      should(middlewareConfigs[3].method).eql('b');
     });
     it('injects configured body as argument to remote method', function(done){
       var targetObject = {
@@ -85,12 +125,12 @@ describe('ServerRemoteObject', function(){
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
-      should(middlewareConfigs['post-save']['post']['verb']).eql('post');
-      should(middlewareConfigs['post-save']['post']['path']).eql('/api/save');
+      should(middlewareConfigs[0].verb).eql('post');
+      should(middlewareConfigs[0].path).eql('/api/save');
 
       var reqSave = new ExpressMockRequest({body: 'post body'});
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData).eql('post body');
         done();
       }).catch(function(err){
@@ -121,12 +161,12 @@ describe('ServerRemoteObject', function(){
       var remoteObject = new ServerRemoteObject(targetObject, config);
       var middlewareConfigs = remoteObject.getMiddlewareConfig();
 
-      should(middlewareConfigs['post-save']['post']['verb']).eql('post');
-      should(middlewareConfigs['post-save']['post']['path']).eql('/api/save');
+      should(middlewareConfigs[0]['verb']).eql('post');
+      should(middlewareConfigs[0]['path']).eql('/api/save');
 
       var reqSave = new ExpressMockRequest({body: 'post body'});
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData).eql('post body');
         done();
       }).catch(function(err){
@@ -159,7 +199,7 @@ describe('ServerRemoteObject', function(){
 
       var reqSave = new ExpressMockRequest({body: {content: 'content value'}});
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData).eql('content value');
         done();
       }).catch(function(err){
@@ -192,7 +232,7 @@ describe('ServerRemoteObject', function(){
 
       var reqSave = new ExpressMockRequest({body: {content: 'content value'}});
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData).eql('content value');
         done();
       }).catch(function(err){
@@ -225,7 +265,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetByPkey = new ExpressMockRequest({params: {pkey: 123}});
       var resGetByPkey = new ExpressMockResponse;
-      middlewareConfigs['get-byPkey']['get']['callback'](reqGetByPkey, resGetByPkey).then(function(){
+      middlewareConfigs[0].callback(reqGetByPkey, resGetByPkey).then(function(){
         should(resGetByPkey.mockData).eql(123);
         done();
       }).catch(function(err){
@@ -258,7 +298,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetByPkey = new ExpressMockRequest({params: {pkey: 123}});
       var resGetByPkey = new ExpressMockResponse;
-      middlewareConfigs['get-byPkey']['get']['callback'](reqGetByPkey, resGetByPkey).then(function(){
+      middlewareConfigs[0].callback(reqGetByPkey, resGetByPkey).then(function(){
         should(resGetByPkey.mockData).eql({pkey: 123});
         done();
       }).catch(function(err){
@@ -291,7 +331,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+      middlewareConfigs[0].callback(reqGetAll, resGetAll).then(function(){
         should(resGetAll.mockData).eql(50);
         done();
       }).catch(function(err){
@@ -324,7 +364,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+      middlewareConfigs[0].callback(reqGetAll, resGetAll).then(function(){
         should(resGetAll.mockData).eql({offset: 50});
         done();
       }).catch(function(err){
@@ -357,7 +397,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+      middlewareConfigs[0].callback(reqGetAll, resGetAll).then(function(){
         should(resGetAll.mockData).eql(reqGetAll);
         done();
       }).catch(function(err){
@@ -390,7 +430,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+      middlewareConfigs[0].callback(reqGetAll, resGetAll).then(function(){
         should(resGetAll.mockData).eql(reqGetAll.query);
         done();
       }).catch(function(err){
@@ -423,7 +463,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
       var resGetAll = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+      middlewareConfigs[0].callback(reqGetAll, resGetAll).then(function(){
         should(resGetAll.mockData).eql(resGetAll);
         done();
       }).catch(function(err){
@@ -457,7 +497,7 @@ describe('ServerRemoteObject', function(){
       var reqGetAll = new ExpressMockRequest();
       var resGetAll = new ExpressMockResponse();
       resGetAll.test = 'a';
-      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+      middlewareConfigs[0].callback(reqGetAll, resGetAll).then(function(){
         should(resGetAll.mockData).eql('a');
         done();
       }).catch(function(err){
@@ -487,7 +527,7 @@ describe('ServerRemoteObject', function(){
 
       var reqSave = new ExpressMockRequest;
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockCode).eql(200);
         done();
       }).catch(function(err){
@@ -520,7 +560,7 @@ describe('ServerRemoteObject', function(){
 
       var reqSave = new ExpressMockRequest;
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockCode).eql(202);
         done();
       }).catch(function(err){
@@ -550,7 +590,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetAll = new ExpressMockRequest;
       var resGetAll = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](reqGetAll, resGetAll).then(function(){
+      middlewareConfigs[0].callback(reqGetAll, resGetAll).then(function(){
         should(resGetAll.mockCode).eql(500);
         done();
       }).catch(function(err){
@@ -605,7 +645,7 @@ describe('ServerRemoteObject', function(){
 
       var reqSave = new ExpressMockRequest;
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockCode).eql(403);
       }).catch(function(error){
         should(error).eql('403 error message');
@@ -613,7 +653,7 @@ describe('ServerRemoteObject', function(){
 
       var reqGetOne = new ExpressMockRequest;
       var resGetOne = new ExpressMockResponse;
-      middlewareConfigs['get-one']['get']['callback'](reqGetOne, resGetOne).then(function(){
+      middlewareConfigs[1].callback(reqGetOne, resGetOne).then(function(){
         should(resGetOne.mockCode).eql(404);
       }).catch(function(error){
         should(error).eql('404 error message');
@@ -667,7 +707,7 @@ describe('ServerRemoteObject', function(){
         stringToObjectId: '507f191e810c19729de860ea'
       }});
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData.stringToNumber).eql(456);
         should(resSave.mockData.stringToNumber.constructor).eql(Number);
         should(resSave.mockData.stringToBooleanTrue).eql(true);
@@ -709,13 +749,13 @@ describe('ServerRemoteObject', function(){
 
       var reqSaveFail = new ExpressMockRequest;
       var resSaveFail = new ExpressMockResponse;
-      promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveFail, resSaveFail).then(function(){
+      promises.push(middlewareConfigs[0].callback(reqSaveFail, resSaveFail).then(function(){
         should(resSaveFail.mockCode).eql(403);
       }));
 
       var reqSaveSuccess = new ExpressMockRequest({body: {name: 'Kevin'}});
       var resSaveSuccess = new ExpressMockResponse;
-      promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveSuccess, resSaveSuccess).then(function(){
+      promises.push(middlewareConfigs[0].callback(reqSaveSuccess, resSaveSuccess).then(function(){
         should(resSaveSuccess.mockData).eql('Kevin');
       }));
 
@@ -753,13 +793,13 @@ describe('ServerRemoteObject', function(){
 
       var reqSaveFail = new ExpressMockRequest({body: {name: 'NULL'}});
       var resSaveFail = new ExpressMockResponse;
-      promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveFail, resSaveFail).then(function(){
+      promises.push(middlewareConfigs[0].callback(reqSaveFail, resSaveFail).then(function(){
         should(resSaveFail.mockCode).eql(403);
       }));
 
       var reqSaveSuccess = new ExpressMockRequest({body: {name: 'Kevin'}});
       var resSaveSuccess = new ExpressMockResponse;
-      promises.push(middlewareConfigs['post-save']['post']['callback'](reqSaveSuccess, resSaveSuccess).then(function(){
+      promises.push(middlewareConfigs[0].callback(reqSaveSuccess, resSaveSuccess).then(function(){
         should(resSaveSuccess.mockData).eql('Kevin');
       }));
 
@@ -795,7 +835,7 @@ describe('ServerRemoteObject', function(){
 
       var reqSave = new ExpressMockRequest;
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData).eql('Kevin');
         done();
       }).catch(function(err){
@@ -828,7 +868,7 @@ describe('ServerRemoteObject', function(){
 
       var reqSave = new ExpressMockRequest({body: {name: null}});
       var resSave = new ExpressMockResponse;
-      middlewareConfigs['post-save']['post']['callback'](reqSave, resSave).then(function(){
+      middlewareConfigs[0].callback(reqSave, resSave).then(function(){
         should(resSave.mockData).eql('Kevin');
         done();
       }).catch(function(err){
@@ -870,7 +910,7 @@ describe('ServerRemoteObject', function(){
 
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+      middlewareConfigs[0].callback(req, res).then(function(){
         should(res.mockCode).eql(401);
         done();
       }).catch(function(err){
@@ -911,7 +951,7 @@ describe('ServerRemoteObject', function(){
 
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+      middlewareConfigs[0].callback(req, res).then(function(){
         should(res.mockData).eql('success');
         done();
       }).catch(function(err){
@@ -962,7 +1002,7 @@ describe('ServerRemoteObject', function(){
 
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+      middlewareConfigs[0].callback(req, res).then(function(){
         should(res.mockData.user.id).eql('123');
         done();
       }).catch(function(err){
@@ -1014,7 +1054,7 @@ describe('ServerRemoteObject', function(){
 
       var req = new ExpressMockRequest;
       var res = new ExpressMockResponse;
-      middlewareConfigs['get-all']['get']['callback'](req, res).then(function(){
+      middlewareConfigs[0].callback(req, res).then(function(){
         should(res.mockData.userId).eql('123');
         done();
       }).catch(function(err){
