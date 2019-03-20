@@ -168,7 +168,7 @@ export class Server
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
       const endpointsDisable = apiConfig.endpointsDisable ? apiConfig.endpointsDisable : {};
       const endpointGroupsDisable = apiConfig.endpointGroupsDisable ? apiConfig.endpointGroupsDisable : {};
-      var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
+      var endpoints = apiConfig.endpoints ? {...repoEndpointsConfigDefault, ...apiConfig.endpoints} : repoEndpointsConfigDefault;
 
       if (!enable) continue;
 
@@ -244,5 +244,181 @@ function camelToKebab(input)
 {
   return input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
+
+const repoEndpointsConfigDefault =
+{
+  getFind: {
+    path: '/',
+    method: '_find',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'requestQuery', src: 'query'},
+      {src: 'acl-conditions'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    },
+    acl: {}
+  },
+  getFindOne: {
+    path: '/find-one',
+    method: '_findOne',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'requestQuery', src: 'query'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    }
+  },
+  getCount: {
+    path: '/count',
+    method: '_count',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'requestQuery', src: 'query'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    }
+  },
+  getFindByPkey: {
+    path: '/:pkey',
+    method: '_findByPkey',
+    verbs: ['get', 'head'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'pkey', src: 'param', type: 'ObjectID'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}},
+        ServerErrorRepoNotFound: {http: {code: 404}}
+      }
+    }
+  },
+  getExistsByPkey: {
+    path: '/:pkey/exists',
+    method: '_existsByPkey',
+    verbs: ['get'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'pkey', src: 'param'},
+      {srcName: 'requestQuery', src: 'query-root'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}},
+        ServerErrorRepoNotFound: {http: {code: 404}}
+      }
+    }
+  },
+  headExistsByPkey: {
+    path: '/:pkey',
+    method: '_existsByPkey',
+    verbs: ['head'],
+    groups: ['default', 'read'],
+    args: [
+      {srcName: 'pkey', src: 'param'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}},
+        ServerErrorRepoNotFound: {http: {code: 404}}
+      }
+    }
+  },
+  putUpsertOne: {
+    path: '/',
+    method: '_upsertOne',
+    verbs: ['put'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    }
+  },
+  putUpdateOneByPkey: {
+    path: '/:pkey',
+    method: '_updateOneByPkey',
+    verbs: ['put'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'pkey', src: 'path-param'},
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    }
+  },
+  postInsert: {
+    path: '/',
+    method: '_insert',
+    verbs: ['post'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    }
+  },
+  postUpdateOne: {
+    path: '/update',
+    method: '_updateOne',
+    verbs: ['post'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'requestBody', src: 'body'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    }
+  },
+  deleteOneByPkey: {
+    path: '/:pkey',
+    method: '_deleteOneByPkey',
+    verbs: ['delete'],
+    groups: ['default', 'write'],
+    args: [
+      {srcName: 'pkey', src: 'param'}
+    ],
+    response: {
+      success: {http: {code: 200, contentType: 'json'}},
+      error: {
+        RepoErrorValidation: {http: {code: 403}}
+      }
+    }
+  }
+};
 
 export default Server;
