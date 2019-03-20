@@ -26,7 +26,7 @@ export class Server
   aclRoleAssessor: {[key: string]: any};
   logger: any;
   
-  constructor(options?: ServerConfig)
+  constructor(options?: ServerConfig, modelManager?: ModelManager)
   {
     this.config = options ? options : {};
     this.config.path = this.config.path ? this.config.path : '/api';
@@ -36,7 +36,7 @@ export class Server
     this.config.initDirName = this.config.initDirName ? this.config.initDirName : '/init';
     this.config.aclDirName = this.config.aclDirName ? this.config.aclDirName : '/acl';
     
-    this.modelManager = this.config.model ? this.config.model : new ModelManager;
+    this.modelManager = modelManager ? modelManager : new ModelManager(this.config.model ? this.config.model : undefined);
 
     this.app = express();
     this.server = null;
