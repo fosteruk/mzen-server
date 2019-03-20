@@ -36,7 +36,7 @@ export class Server
     this.config.initDirName = this.config.initDirName ? this.config.initDirName : '/init';
     this.config.aclDirName = this.config.aclDirName ? this.config.aclDirName : '/acl';
     
-    this.modelManager = this.config.model;
+    this.modelManager = this.config.model ? this.config.model : new ModelManager;
 
     this.app = express();
     this.server = null;
