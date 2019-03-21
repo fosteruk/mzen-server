@@ -1,9 +1,15 @@
 'use strict'
 
 var ModelManager = require('mzen').default;
-var Repo = require('../lib/repo').default;
-var Service = require('../lib/service').default;
+var ServerRepo = require('../lib/repo').default;
+var ServerService = require('../lib/service').default;
 var Server = require('../lib/server').default;
+
+var server = new Server({model: {
+  dataSources: [{
+     name: 'db', type: 'mongodb', url: 'mongodb://localhost:27017/domain-model-api-example'
+  }]
+}});
 
 var data = {
   person: [
@@ -65,12 +71,6 @@ var data = {
   ]
 };
 
-var modelManager = new ModelManager({
-  dataSources: [{
-     name: 'db', type: 'mongodb', url: 'mongodb://localhost:27017/domain-model-api-example'
-  }]
-});
-
 class Person {
   getName()
   {
@@ -85,7 +85,7 @@ class PersonContact {
   }
 };
 
-var personRepo = new Repo({
+var personRepo = new ServerRepo({
   name: 'person',
   dataSource: 'db',
   api: {
@@ -118,10 +118,6 @@ var personRepo = new Repo({
         }
       }
     }
-  },
-  entityConstructor: Person,
-  embeddedConstructors: {
-    'contact': PersonContact
   },
   strict: false,
   schema: {
@@ -173,9 +169,9 @@ var personRepo = new Repo({
     },
   }
 });
-modelManager.addRepo(personRepo);
+server.modelManager.addRepo(personRepo);
 
-var workPlaceRepo = new Repo({
+var workPlaceRepo = new ServerRepo({
   name: 'workPlace',
   dataSource: 'db',
   schema: {
@@ -191,9 +187,9 @@ var workPlaceRepo = new Repo({
     }
   }
 });
-modelManager.addRepo(workPlaceRepo);
+server.modelManager.addRepo(workPlaceRepo);
 
-class ArtistContactService extends Service
+class ArtistContactService extends ServerService
 {
   constructor(options) 
   {
@@ -247,21 +243,18 @@ class ArtistContactService extends Service
     return Promise.resolve(artistId);
   }
 }
-modelManager.addService(new ArtistContactService);
+server.modelManager.addService(new ArtistContactService);
 
-var server = new Server({model: modelManager});
-server.init().then(function(){
-  server.start();
-}).then(function(){;
-  return personRepo.deleteMany();
-}).then(function(){
-  return workPlaceRepo.deleteMany();
-}).then(function(){
-  return modelManager.repos['user'].deleteMany();
-}).then(function(){
-  return personRepo.insertMany(data.person);
-}).then(function(savedData){
-  return workPlaceRepo.insertOne(data.workPlace[0]);
-}).catch(function(err) {
-  console.log(JSON.stringify(err.stack, null, 2));
-});
+
+(async () => {
+  try {
+    await server.init();
+    await server.start();
+    await personRepo.deleteMany();
+    await workPlaceRepo.deleteMany();
+    await personRepo.insertMany(data.person);
+    await workPlaceRepo.insertOne(data.workPlace[0]);
+  } catch (e) {
+    console.log(JSON.stringify(e.stack, null, 2));
+  }
+})();
