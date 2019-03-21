@@ -1,95 +1,87 @@
-export class ErrorServer extends Error
+import { ServerConfigApiEndpointResponse } from './config-api';
+
+export class ServerError extends Error
 {
   constructor(data?)
   {
     super();
     data = typeof data == 'string' ? {message: data} : data;
     Object.assign(this, data);
-    this.name = 'ErrorServer';
+    this.name = 'ServerError';
   }
 }
 
-export class ErrorInternalServer extends ErrorServer
+export class ServerErrorInternal extends ServerError
 {
   constructor(data?)
   {
     super(data);
-    this.name = 'ErrorInternalServer';
+    this.name = 'ServerErrorInternal';
   }
 } // 500
 
-export class ErrorBadRequest extends ErrorServer
+export class ServerErrorBadRequest extends ServerError
 {
   constructor(data?)
   {
     super(data);
-    this.name = 'ErrorBadRequest';
+    this.name = 'ServerErrorBadRequest';
   }
 } // 400
 
-export class ErrorUnauthorized extends ErrorServer
+export class ServerErrorUnauthorized extends ServerError
 {
   constructor(data?)
   {
     super(data);
-    this.name = 'ErrorUnauthorized';
+    this.name = 'ServerErrorUnauthorized';
   }
 } // 401
 
-export class ErrorForbidden extends ErrorServer
+export class ServerErrorForbidden extends ServerError
 {
   constructor(data?)
   {
     super(data);
-    this.name = 'ErrorForbidden';
+    this.name = 'ServerErrorForbidden';
   }
 } // 403
 
-export class ErrorNotFound extends ErrorServer
+export class ServerErrorNotFound extends ServerError
 {
   constructor(data?)
   {
     super(data);
-    this.name = 'ErrorNotFound';
+    this.name = 'ServerErrorNotFound';
   }
 } // 404
 
-export class ErrorMethodNotAllowed extends ErrorServer
+export class ServerErrorMethodNotAllowed extends ServerError
 {
   constructor(data?)
   {
     super(data);
-    this.name = 'ErrorMethodNotAllowed';
+    this.name = 'ServerErrorMethodNotAllowed';
   }
 } // 405
 
-export class ErrorTooManyRequests extends ErrorServer
+export class ServerErrorTooManyRequests extends ServerError
 {
   constructor(data?)
   {
     super(data);
-    this.name = 'ErrorTooManyRequests';
+    this.name = 'ServerErrorTooManyRequests';
   }
 } // 429
 
-export var endpoints = {
-  ErrorInternalServer: {http: {code: 500}},
-  ErrorBadRequest: {http: {code: 400}},
-  ErrorUnauthorized: {http: {code: 401}},
-  ErrorForbidden: {http: {code: 403}},
-  ErrorNotFound: {http: {code: 404}},
-  ErrorMethodNotAllowed: {http: {code: 405}},
-  ErrorTooManyRequests: {http: {code: 429}}
-};
+export const serverErrorApiEndpointResponseConfig = {
+  ServerErrorInternal: {http: {code: 500}},
+  ServerErrorBadRequest: {http: {code: 400}},
+  ServerErrorUnauthorized: {http: {code: 401}},
+  ServerErrorForbidden: {http: {code: 403}},
+  ServerErrorNotFound: {http: {code: 404}},
+  ServerErrorMethodNotAllowed: {http: {code: 405}},
+  ServerErrorTooManyRequests: {http: {code: 429}}
+} as {[key: string]: ServerConfigApiEndpointResponse};
 
-export var error = {
-  ErrorInternalServer,
-  ErrorBadRequest,
-  ErrorUnauthorized,
-  ErrorForbidden,
-  ErrorNotFound,
-  ErrorMethodNotAllowed,
-  ErrorTooManyRequests
-};
-
-export default error;
+export default ServerError;

@@ -27,11 +27,7 @@ export interface ServerConfigApiEndpointResponse
     code?: number, 
     contentType?: string
   };
-}
-
-export interface ServerConfigApiEndpointResponseError extends ServerConfigApiEndpointResponse
-{
-  schema?: Schema
+  schema?: Schema;
 }
 
 export interface ServerConfigApiEndpoint
@@ -44,7 +40,7 @@ export interface ServerConfigApiEndpoint
   priority?: number,
   response?: {
     success?: ServerConfigApiEndpointResponse,
-    error?: {[key: string]: ServerConfigApiEndpointResponseError}
+    error?: {[key: string]: ServerConfigApiEndpointResponse}
   }
 }
 

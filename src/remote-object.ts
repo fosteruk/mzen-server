@@ -1,18 +1,8 @@
 import ServerAcl from './acl';
 import { Schema, SchemaValidationResult } from 'mzen';
-import { ErrorServer, ErrorUnauthorized } from './error';
-import { ServerConfigApiAcl, ServerConfigApiEndpoint, ServerConfigApiEndpointResponse, ServerConfigApiEndpointResponseError } from './config-api';
+import { ServerError, ServerErrorUnauthorized, serverErrorApiEndpointResponseConfig} from './error';
+import { ServerConfigApiAcl, ServerConfigApiEndpoint, ServerConfigApiEndpointResponse } from './config-api';
 import clone = require('clone');
-
-export var errorEndpointResponses = {
-  ErrorInternalServer: {http: {code: 500}},
-  ErrorBadRequest: {http: {code: 400}},
-  ErrorUnauthorized: {http: {code: 401}},
-  ErrorForbidden: {http: {code: 403}},
-  ErrorNotFound: {http: {code: 404}},
-  ErrorMethodNotAllowed: {http: {code: 405}},
-  ErrorTooManyRequests: {http: {code: 429}}
-} as {[key: string]: ServerConfigApiEndpointResponse};
 
 export interface ServerRemoteObjectConfig
 {
@@ -23,7 +13,7 @@ export interface ServerRemoteObjectConfig
 
 export class ServerRemoteObject
 {
-  static error: {[key: string]: ErrorServer};
+  static error: {[key: string]: ServerError};
   
   config: ServerRemoteObjectConfig;
   object: any;
@@ -79,6 +69,7 @@ export class ServerRemoteObject
       const responseSuccess = response.success ? response.success: {};
       const responseErrorConfig = response.error ? response.error: {};
       // Append configured error handlers to default error handlers
+      var errorEndpointResponses = {...serverErrorApiEndpointResponseConfig} as ServerConfigApiEndpointResponse;
       for (var errorName in responseErrorConfig) {
         errorEndpointResponses[errorName] = responseErrorConfig[errorName];
       }
@@ -99,7 +90,7 @@ export class ServerRemoteObject
                 return this.acl.isPermitted(endpointName, aclContext);
               }).then((isPermitted) => {
                 if (isPermitted === false) {
-                  throw new ErrorUnauthorized();
+                  throw new ServerErrorUnauthorized();
                 }
 
                 // Append the aclContext and aclConditions to the requestArgs
@@ -123,13 +114,12 @@ export class ServerRemoteObject
                   }
                 })
               }).catch((error) => {
-                var errorContent = error.content ? error : 'Error!';
                 var errorHandled = false;
                 if (Object.keys(errorEndpointResponses).length) {
                   for (var errorName in errorEndpointResponses) {
                     if (errorName !== error.constructor.name) continue;
 
-                    const errorConfig = errorEndpointResponses[errorName] as ServerConfigApiEndpointResponseError;
+                    const errorConfig = errorEndpointResponses[errorName] as ServerConfigApiEndpointResponse;
                     const schemaConfig = errorConfig.schema ? errorConfig.schema : null;
                     const httpConfig = errorConfig.http ? errorConfig.http: {};
                     const code = httpConfig.code ? httpConfig.code : 400;
@@ -137,7 +127,7 @@ export class ServerRemoteObject
 
                     let errorValidatePromise = Promise.resolve({isValid: true} as SchemaValidationResult);
                     if (schemaConfig) {
-                      let schema = new Schema(errorContent);
+                      let schema = new Schema(schemaConfig);
                       errorValidatePromise = schema.validate(error);
                     }
                     errorValidatePromise.then((validateResult) => {

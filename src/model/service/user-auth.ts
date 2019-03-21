@@ -1,5 +1,5 @@
 import ServerService from '../../service';
-import { ErrorUnauthorized, ErrorNotFound } from '../../error';
+import { ServerErrorUnauthorized, ServerErrorNotFound } from '../../error';
 import bcrypt = require('bcrypt');
 import crypto = require('crypto');
 
@@ -62,12 +62,12 @@ export class ServiceUserAuth extends ServerService
     var user = await this.repos.user.findOne({email: email});
 
     if (!user) {
-      throw new ErrorUnauthorized;
+      throw new ServerErrorUnauthorized;
     }
 
     var bcryptRes = await bcrypt.compare(password, user.password);
     if (!bcryptRes) {
-      throw new ErrorUnauthorized;
+      throw new ServerErrorUnauthorized;
     }
 
     const ttl = 604800;
@@ -95,7 +95,7 @@ export class ServiceUserAuth extends ServerService
   {
     var user = await this.repos.user.findOne({'accessToken.accessToken': accessToken});
     if (!user) {
-      throw new ErrorNotFound;
+      throw new ServerErrorNotFound;
     }
 
     await this.repos.user.updateOne({'accessToken.accessToken': accessToken}, {$unset: {accessToken: ''}});
