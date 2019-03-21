@@ -1,4 +1,4 @@
-import { ServerConfigApiEndpointResponse } from './config-api';
+import { ServerApiConfigEndpointResponse } from './api-config';
 
 export class ServerError extends Error
 {
@@ -82,6 +82,6 @@ export const serverErrorApiEndpointResponseConfig = {
   ServerErrorNotFound: {http: {code: 404}},
   ServerErrorMethodNotAllowed: {http: {code: 405}},
   ServerErrorTooManyRequests: {http: {code: 429}}
-} as {[key: string]: ServerConfigApiEndpointResponse};
+} as {[key: string]: ServerApiConfigEndpointResponse};
 
 export default ServerError;

@@ -1,12 +1,12 @@
 import { TypeCaster, Repo, RepoConfig } from 'mzen';
-import ServerConfigApi from './config-api';
+import ServerApiConfig from './api-config';
 import clone = require('clone');
 
 export class ServerErrorRepoNotFound extends Error {}
 
 export interface ServerRepoConfig extends RepoConfig
 {
-  api?: ServerConfigApi;
+  api?: ServerApiConfig;
 }
 
 export class ServerRepo extends Repo 

@@ -1,9 +1,9 @@
 import { Service, ServiceConfig } from 'mzen';
-import ServerConfigApi from './config-api';
+import ServerApiConfig from './api-config';
 
 export interface ServerServiceConfig extends ServiceConfig
 {
-  api?: ServerConfigApi;
+  api?: ServerApiConfig;
 }
 
 export class ServerService extends Service 

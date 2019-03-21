@@ -1,14 +1,14 @@
 import ServerAcl from './acl';
 import { Schema, SchemaValidationResult } from 'mzen';
 import { ServerError, ServerErrorUnauthorized, serverErrorApiEndpointResponseConfig} from './error';
-import { ServerConfigApiAcl, ServerConfigApiEndpoint, ServerConfigApiEndpointResponse } from './config-api';
+import { ServerApiConfigAcl, ServerApiConfigEndpoint, ServerApiConfigEndpointResponse } from './api-config';
 import clone = require('clone');
 
 export interface ServerRemoteObjectConfig
 {
   path?: string;
-  acl?: ServerConfigApiAcl;
-  endpoints?: {[key: string]: ServerConfigApiEndpoint};
+  acl?: ServerApiConfigAcl;
+  endpoints?: {[key: string]: ServerApiConfigEndpoint};
 }
 
 export class ServerRemoteObject
@@ -69,7 +69,7 @@ export class ServerRemoteObject
       const responseSuccess = response.success ? response.success: {};
       const responseErrorConfig = response.error ? response.error: {};
       // Append configured error handlers to default error handlers
-      var errorEndpointResponses = {...serverErrorApiEndpointResponseConfig} as ServerConfigApiEndpointResponse;
+      var errorEndpointResponses = {...serverErrorApiEndpointResponseConfig} as ServerApiConfigEndpointResponse;
       for (var errorName in responseErrorConfig) {
         errorEndpointResponses[errorName] = responseErrorConfig[errorName];
       }
@@ -119,7 +119,7 @@ export class ServerRemoteObject
                   for (var errorName in errorEndpointResponses) {
                     if (errorName !== error.constructor.name) continue;
 
-                    const errorConfig = errorEndpointResponses[errorName] as ServerConfigApiEndpointResponse;
+                    const errorConfig = errorEndpointResponses[errorName] as ServerApiConfigEndpointResponse;
                     const schemaConfig = errorConfig.schema ? errorConfig.schema : null;
                     const httpConfig = errorConfig.http ? errorConfig.http: {};
                     const code = httpConfig.code ? httpConfig.code : 400;
