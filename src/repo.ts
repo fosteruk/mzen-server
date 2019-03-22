@@ -1,4 +1,4 @@
-import { TypeCaster, Repo, RepoConfig } from 'mzen';
+import { SchemaTypeCaster, Repo, RepoConfig } from 'mzen';
 import ServerApiConfig from './api-config';
 import clone = require('clone');
 
@@ -124,9 +124,9 @@ export class ServerRepo extends Repo
     const filter = query && query.filter ? query.filter : undefined;
     const where = filter && filter.where ? filter.where : {};
     const fields = filter && filter.fields ? filter.fields : undefined;
-    const limit = filter && filter.limit ? TypeCaster.cast(Number, filter.limit) : undefined;
+    const limit = filter && filter.limit ? SchemaTypeCaster.cast(Number, filter.limit) : undefined;
     const limitFinal = (!limit || (limit > maxResults && mode != 'count')) ? maxResults : limit;
-    const skip = filter && filter.skip ? TypeCaster.cast(Number, filter.skip) : undefined;
+    const skip = filter && filter.skip ? SchemaTypeCaster.cast(Number, filter.skip) : undefined;
     const sort = filter && filter.sort ? filter.sort : undefined;
 
     var options = {

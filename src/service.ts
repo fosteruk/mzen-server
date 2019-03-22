@@ -8,6 +8,8 @@ export interface ServerServiceConfig extends ServiceConfig
 
 export class ServerService extends Service 
 {
+  config: ServerServiceConfig;
+  
   constructor(options?: ServerServiceConfig)
   {
     super(options);

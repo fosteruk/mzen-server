@@ -1,5 +1,7 @@
-import { ResourceLoader, ModelManager } from 'mzen';
+import { ResourceLoader, ModelManager, ModelManagerConfig } from 'mzen';
 import ServerRemoteObject from './remote-object';
+import ServerRepo from './repo';
+import ServerService from './service';
 import ServerAcl from './acl';
 import Http = require('http');
 import express = require('express');
@@ -13,7 +15,7 @@ export interface ServerConfig
   appDir?: string;
   initDirName?: string;
   aclDirName?: string;
-  model?: ModelManager 
+  model?: ModelManagerConfig 
 }
 
 export class Server
@@ -44,11 +46,13 @@ export class Server
     this.aclRoleAssessor = {};
     this.setLogger(console);
   }
+  
   setLogger(logger)
   {
     this.logger = logger;
     return this;
   }
+  
   async init()
   {
     // Add app model directory based on value of appDir if no model directories have been configured
@@ -63,6 +67,7 @@ export class Server
     await this.registerServiceEndpoints();
     await this.registerRepoApiEndpoints();
   }
+  
   bootInitScripts()
   {
     const initDirectoryPath = this.config.appDir + '/' + this.config.initDirName;
@@ -104,6 +109,7 @@ export class Server
 
     return promise;
   }
+  
   async loadResources()
   {
     const loader = new ResourceLoader();
@@ -116,24 +122,31 @@ export class Server
 
     return this;
   }
+  
   registerServiceEndpoints()
   {
     const services = this.modelManager.services;
     for (let serviceName in services)
     {
-      const apiConfig = services[serviceName].config.api ? services[serviceName].config.api : {};
+      const service = services[serviceName] as ServerService;
+      const apiConfig = service.config.api ? service.config.api : {};
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
-      const endpointsEnable = apiConfig.endpointsEnable ? apiConfig.endpointsEnable : {};
+      const endpointsDisable = apiConfig.endpointsDisable ? apiConfig.endpointsDisable : {};
+      const endpointGroupsDisable = apiConfig.endpointGroupsDisable ? apiConfig.endpointGroupsDisable : {};
       var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
-
-      // Remove any endpoints that have been disabled
+      
+      // Remove any enpoints that have been disabled
       for (var endpointName in endpoints) {
-        if (endpointsEnable[endpointName] === false) {
-          delete endpoints[endpointName];
+        var groups = endpoints[endpointName].groups;
+        if (Array.isArray(groups)) {
+          groups.forEach(function(group){
+            if (endpoints[endpointName] && endpointGroupsDisable[group] == true) delete endpoints[endpointName]
+          });
         }
+        if (endpoints[endpointName] && endpointsDisable[endpointName] == true) delete endpoints[endpointName];
       }
 
-      if (Object.keys(endpoints).length == 0) continue; // This service has no end points - nothing more to do
+      if (Object.keys(endpoints).length == 0) continue; // This repo has no end points - nothing more to do
 
       const aclConfig = {
         rules: repoAclConfig.rules,
@@ -157,13 +170,15 @@ export class Server
       remoteObject.initRouter(this.router);
     }
   }
+  
   registerRepoApiEndpoints()
   {
     const repos = this.modelManager.repos;
 
     for (var repoName in repos)
     {
-      const apiConfig = repos[repoName].config.api ? repos[repoName].config.api: {};
+      const repo = repos[repoName] as ServerRepo;
+      const apiConfig = repo.config.api ? repo.config.api: {};
       const enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
       const endpointsDisable = apiConfig.endpointsDisable ? apiConfig.endpointsDisable : {};
@@ -206,6 +221,7 @@ export class Server
       remoteObject.initRouter(this.router);
     }
   }
+  
   async start()
   {
     this.app.use(bodyParser.json()); // for parsing application/json
@@ -232,6 +248,7 @@ export class Server
       });
     });
   }
+  
   async shutdown()
   {
     this.logger.info('Shutting down');

@@ -33,6 +33,7 @@ export interface ServerApiConfigEndpointResponse
 export interface ServerApiConfigEndpoint
 {
   path?: string;
+  groups?: Array<string>;
   method?: string;
   verbs?: Array<string>;
   args?: Array<ServerApiConfigEndpointArg>;
@@ -47,6 +48,7 @@ export interface ServerApiConfigEndpoint
 export interface ServerApiConfig
 {
   enable?: boolean;
+  endpointsDisable?: {[key: string]: boolean};
   endpointGroupsDisable?: {default?: boolean, [key: string]: boolean};
   acl?: ServerApiConfigAcl;
   endpoints?: {[key: string]: ServerApiConfigEndpoint};
