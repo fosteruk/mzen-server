@@ -8,6 +8,7 @@ export interface ServerApiConfigEndpointArg
   notNull?: boolean; 
   notEmpty?: boolean;
   defaultValue?: any;
+  type?: any
 }
 
 export interface ServerApiConfigAclRule
