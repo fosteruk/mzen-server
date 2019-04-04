@@ -68,13 +68,13 @@ export class Server
     await this.registerRepoApiEndpoints();
   }
   
-  bootInitScripts()
+  async bootInitScripts()
   {
     const initDirectoryPath = this.config.appDir + '/' + this.config.initDirName;
     var initScripts = {};
     if (fs.existsSync(initDirectoryPath)) {
       var filenames = fs.readdirSync(initDirectoryPath);
-      filenames.forEach(function(filename){
+      filenames.forEach(filename => {
         if (fs.lstatSync(initDirectoryPath + '/' + filename).isDirectory() || filename[0] == '.') return;
         initScripts[filename] = initDirectoryPath + '/' + filename;
       });
@@ -83,31 +83,19 @@ export class Server
 
     // Sort by filename
     // - the order of execution is important so files should be named to give the correct order
-    filenames.sort(function(a, b) {
-      return (a > b) ? 1 : 0;
-    });
+    filenames.sort((a, b) =>  (a > b ? 1 : 0));
 
-    var filePaths = [];
-    filenames.forEach(function(filename){
-      filePaths.push(initScripts[filename]);
-    });
+    var filePaths = filenames.map(filename => initScripts[filename]);
 
-    var promise = Promise.resolve();
-    filePaths.forEach((filePath) => {
-      promise.then(() => {
-        let initFunction = require(filePath);
-        promise = Promise.resolve();
-        if (typeof initFunction == 'function') {
-          let result = initFunction.call(this);
-          if (result && result.constructor && result.constructor instanceof Promise) {
-            promise = result;
-          }
+    filePaths.forEach(async filePath => {
+      let initFunction = require(filePath);
+      if (typeof initFunction == 'function') {
+        let promise = initFunction(this);
+        if (promise && promise.constructor && promise.constructor instanceof Promise) {
+          await promise;
         }
-        return promise;
-      });
+      }
     });
-
-    return promise;
   }
   
   async loadResources()
