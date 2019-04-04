@@ -2,6 +2,7 @@ import { Schema } from 'mzen';
 
 export interface ServerApiConfigEndpointArg
 {
+  name?: string; // if name is not specified defaults to srcKey
   srcKey?: string; 
   src?: string; 
   required?: boolean; 
