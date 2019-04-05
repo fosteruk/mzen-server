@@ -15,7 +15,7 @@ export interface ServerConfig
   appDir?: string;
   initDirName?: string;
   aclDirName?: string;
-  model?: ModelManagerConfig 
+  model?: ModelManagerConfig; 
 }
 
 export class Server
