@@ -75,8 +75,13 @@ export class Server
     if (fs.existsSync(initDirectoryPath)) {
       var filenames = fs.readdirSync(initDirectoryPath);
       filenames.forEach(filename => {
-        if (fs.lstatSync(initDirectoryPath + '/' + filename).isDirectory() || filename[0] == '.') return;
-        initScripts[filename] = initDirectoryPath + '/' + filename;
+        if (
+          fs.lstatSync(initDirectoryPath + '/' + filename).isDirectory() == false && 
+          filename[0] != '.' && 
+          filename.substring(filename.length - 3) == '.js'
+        ) {
+          initScripts[filename] = initDirectoryPath + '/' + filename;
+        }
       });
     }
     var filenames = Object.keys(initScripts);
@@ -88,7 +93,8 @@ export class Server
     var filePaths = filenames.map(filename => initScripts[filename]);
 
     filePaths.forEach(async filePath => {
-      let initFunction = require(filePath);
+      let initFunctionModule = require(filePath);
+      let initFunction = initFunctionModule.__esModule ? initFunctionModule.default : initFunctionModule;
       if (typeof initFunction == 'function') {
         let promise = initFunction(this);
         if (promise && promise.constructor && promise.constructor instanceof Promise) {
