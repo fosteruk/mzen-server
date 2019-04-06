@@ -6,7 +6,7 @@ import ServerAcl from './acl';
 import Http = require('http');
 import express = require('express');
 import bodyParser = require('body-parser');
-import fs = require('fs');
+import path = require('path');
 
 export interface ServerConfig
 {
@@ -70,27 +70,16 @@ export class Server
   
   async bootInitScripts()
   {
-    const initDirectoryPath = this.config.appDir + '/' + this.config.initDirName;
-    var initScripts = {};
-    if (fs.existsSync(initDirectoryPath)) {
-      var filenames = fs.readdirSync(initDirectoryPath);
-      filenames.forEach(filename => {
-        if (
-          fs.lstatSync(initDirectoryPath + '/' + filename).isDirectory() == false && 
-          filename[0] != '.' && 
-          filename.substring(filename.length - 3) == '.js'
-        ) {
-          initScripts[filename] = initDirectoryPath + '/' + filename;
-        }
-      });
-    }
-    var filenames = Object.keys(initScripts);
+    const loader = new ResourceLoader({
+      dirPaths: [this.config.appDir],
+      subdir: this.config.initDirName
+    });
 
+    var filePaths = loader.getResourcePaths();
+    
     // Sort by filename
     // - the order of execution is important so files should be named to give the correct order
-    filenames.sort((a, b) =>  (a > b ? 1 : 0));
-
-    var filePaths = filenames.map(filename => initScripts[filename]);
+    filePaths.sort((a, b) =>  (path.basename(a) > path.basename(b) ? 1 : 0));
 
     filePaths.forEach(async filePath => {
       let initFunctionModule = require(filePath);
@@ -106,9 +95,12 @@ export class Server
   
   async loadResources()
   {
-    const loader = new ResourceLoader();
+    const loader = new ResourceLoader({
+      dirPaths: [this.config.appDir],
+      subdir: this.config.aclDirName + '/role-assessor'
+    });
 
-    const assessors = loader.getResources([this.config.appDir], this.config.aclDirName + '/role-assessor');
+    const assessors = loader.getResources();
     for (let assessorName in assessors) {
       let roleAssessor = new assessors[assessorName]();
       this.aclRoleAssessor[roleAssessor.role] = roleAssessor;
