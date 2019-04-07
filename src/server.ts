@@ -82,8 +82,7 @@ export class Server
     filePaths.sort((a, b) =>  (path.basename(a) > path.basename(b) ? 1 : 0));
 
     filePaths.forEach(async filePath => {
-      let initFunctionModule = require(filePath);
-      let initFunction = initFunctionModule.__esModule ? initFunctionModule.default : initFunctionModule;
+      let initFunction = ResourceLoader.loadModule(filePath);
       if (typeof initFunction == 'function') {
         let promise = initFunction(this);
         if (promise && promise.constructor && promise.constructor instanceof Promise) {
