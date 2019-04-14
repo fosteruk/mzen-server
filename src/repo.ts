@@ -28,8 +28,9 @@ export class ServerRepo extends Repo
   {
     var query = this._parseQuery(clone(requestQuery));
     this._applyAclConditions(query.where, aclConditions);
-    return this.find(query.where, query.fields, query.options);
+    return this.find(query.where, query.options);
   }
+
   async _findOne(requestQuery, aclConditions)
   {
     var query = this._parseQuery(clone(requestQuery));
@@ -40,12 +41,14 @@ export class ServerRepo extends Repo
     }
     return object;
   }
+
   _count(requestQuery, aclConditions)
   {
     var query = this._parseQuery(clone(requestQuery), 'count');
     this._applyAclConditions(query.where, aclConditions);
     return this.count(query.where, query.options);
   }
+
   async _findByPkey(pkey, requestQuery, aclConditions)
   {
     var query = this._parseQuery(clone(requestQuery));
@@ -57,6 +60,7 @@ export class ServerRepo extends Repo
     }
     return object;
   }
+
   async _existsByPkey(pkey, requestQuery, aclConditions)
   {
     requestQuery = requestQuery ? requestQuery : {};
@@ -65,11 +69,12 @@ export class ServerRepo extends Repo
     this._applyAclConditions(query.where, aclConditions);
     var fields = {};
     fields[this.config.pkey] = 1;
-    var objects = await this.findOne(query.where, fields, query.options);
+    var objects = await this.findOne(query.where, query.options);
     if (!objects || Object.keys(objects).length == 0) {
       throw new ServerErrorRepoNotFound;
     }
   }
+
   _upsertOne(requestBody, aclConditions)
   {
     const data = requestBody;
@@ -78,6 +83,7 @@ export class ServerRepo extends Repo
     this._applyAclConditions(where, aclConditions);
     return this.updateOne(where, {$set: data}, {upsert: true, filterPrivate: true});
   }
+
   _updateOneByPkey(pkey, requestBody, aclConditions)
   {
     const data = requestBody;
@@ -86,12 +92,14 @@ export class ServerRepo extends Repo
     this._applyAclConditions(where, aclConditions);
     return this.updateOne(where, {$set: data}, {filterPrivate: true});
   }
+
   _insert(requestBody)
   {
     const data = requestBody;
     var insertMethod = Array.isArray(data) ? 'insertMany' : 'insertOne';
     return this[insertMethod](data, {filterPrivate: true});
   }
+
   _updateOne(requestBody, aclConditions)
   {
     const data = requestBody;
@@ -100,6 +108,7 @@ export class ServerRepo extends Repo
     this._applyAclConditions(where, aclConditions);
     return this.updateOne(where, {$set: data}, {filterPrivate: true});
   }
+
   _deleteOneByPkey(pkey, requestQuery, aclConditions)
   {
     var query = this._parseQuery(clone(requestQuery));
@@ -107,6 +116,7 @@ export class ServerRepo extends Repo
     this._applyAclConditions(query.where, aclConditions);
     return this.deleteOne(query.where, query.options);
   }
+
   _applyAclConditions(where, aclConditions)
   {
     if (aclConditions) {
@@ -117,6 +127,7 @@ export class ServerRepo extends Repo
       });
     }
   }
+
   _parseQuery(query, mode?)
   {
     const apiConfig = this.config.api;
