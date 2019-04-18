@@ -34,7 +34,7 @@ export class Server
     this.config.path = this.config.path ? this.config.path : '/api';
     this.config.port = this.config.port ? this.config.port : 3838;
     // Default appDir directory is the same directory as the executed script
-    this.config.appDir = this.config.appDir ? this.config.appDir : '';
+    this.config.appDir = this.config.appDir ? path.resolve(this.config.appDir) : '';
     this.config.initDirName = this.config.initDirName ? this.config.initDirName : '/init';
     this.config.aclDirName = this.config.aclDirName ? this.config.aclDirName : '/acl';
     
@@ -95,7 +95,7 @@ export class Server
   async loadResources()
   {
     const loader = new ResourceLoader({
-      dirPaths: [this.config.appDir],
+      dirPaths: [__dirname, this.config.appDir],
       subdir: this.config.aclDirName + '/role-assessor'
     });
 
