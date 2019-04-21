@@ -38,7 +38,7 @@ export interface ServerApiConfigEndpoint
   groups?: Array<string>;
   method?: string;
   verbs?: Array<string>;
-  args?: Array<ServerApiConfigEndpointArg>;
+  args?: Array<ServerApiConfigEndpointArg> | {[key: string]: ServerApiConfigEndpointArg};
   acl?: ServerApiConfigAcl;
   priority?: number,
   response?: {
