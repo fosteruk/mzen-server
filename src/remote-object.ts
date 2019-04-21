@@ -213,7 +213,7 @@ export class ServerRemoteObject
       });
     } else {
       for (var key in methodArgsConfig) {
-        parseOne(methodArgsConfig[name], key);
+        parseOne(methodArgsConfig[key], key);
       }
     }
 
