@@ -192,9 +192,9 @@ export class ServerRemoteObject
   {
     var spec = {};
 
-    var parseOne = function(argConfig){
+    var parseOne = function(argConfig, key?){
       const srcKey = argConfig.srcKey ? argConfig.srcKey : null;
-      const name = argConfig.name ? argConfig.name : srcKey;
+      const name = key ? key : (argConfig.name ? argConfig.name : srcKey);
       const type = argConfig.type ? argConfig.type : null;
 
       spec[name] = {};
@@ -212,8 +212,8 @@ export class ServerRemoteObject
         parseOne(argConfig);
       });
     } else {
-      for (var name in methodArgsConfig) {
-        parseOne(methodArgsConfig[name]);
+      for (var key in methodArgsConfig) {
+        parseOne(methodArgsConfig[name], key);
       }
     }
 
