@@ -27,6 +27,7 @@ export class Server
   router: express.Router;
   aclRoleAssessor: {[key: string]: any};
   logger: any;
+  initialised: boolean;
   
   constructor(options?: ServerConfig, modelManager?: ModelManager)
   {
@@ -45,6 +46,7 @@ export class Server
     this.router = express.Router();
     this.aclRoleAssessor = {};
     this.setLogger(console);
+    this.initialised = false;
   }
   
   setLogger(logger)
@@ -55,17 +57,34 @@ export class Server
   
   async init()
   {
-    // Add app model directory based on value of appDir if no model directories have been configured
-    if (this.modelManager.config.modelDirs.length == 0) {
-      this.modelManager.config.modelDirs.push(this.config.appDir + '/model');
-    }
-    // Add default model directory - this is model functionality provided by the mzen-server package
-    this.modelManager.config.modelDirs.unshift(__dirname + '/model');
+    if (!this.initialised) {
+      // Add app model directory based on value of appDir if no model directories have been configured
+      if (this.modelManager.config.modelDirs.length == 0) {
+        this.modelManager.config.modelDirs.push(this.config.appDir + '/model');
+      }
+      // Add default model directory - this is model functionality provided by the mzen-server package
+      this.modelManager.config.modelDirs.unshift(__dirname + '/model');
 
-    await this.modelManager.init();
-    await this.loadResources();
-    await this.registerServiceEndpoints();
-    await this.registerRepoApiEndpoints();
+      await this.modelManager.init();
+      await this.loadResources();
+      await this.registerServiceEndpoints();
+      await this.registerRepoApiEndpoints();
+
+      this.app.use(bodyParser.json()); // for parsing application/json
+      this.app.use(bodyParser.text());
+      this.app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+  
+      await this.bootInitScripts()
+  
+      this.app.use(this.config.path, this.router);
+      this.app.use((err, req, res, next) => {
+        this.logger.error({err, req, res});
+        res.status(500).send('Something broke!');
+        next();
+      });
+
+      this.initialised = true;
+    }
   }
   
   async bootInitScripts()
@@ -209,18 +228,6 @@ export class Server
   
   async start()
   {
-    this.app.use(bodyParser.json()); // for parsing application/json
-    this.app.use(bodyParser.text());
-    this.app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-
-    await this.bootInitScripts()
-
-    this.app.use(this.config.path, this.router);
-    this.app.use((err, req, res, next) => {
-      this.logger.error({err, req, res});
-      res.status(500).send('Something broke!');
-      next();
-    });
     this.server = this.app.listen(this.config.port, () => {
       this.logger.info('Listening on port ' + this.config.port);
     });
