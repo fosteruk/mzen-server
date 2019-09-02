@@ -16,6 +16,7 @@ export interface ServerConfig
   initDirName?: string;
   aclDirName?: string;
   model?: ModelManagerConfig; 
+  [key: string]: any; // Any custom config options
 }
 
 export class Server
@@ -65,18 +66,27 @@ export class Server
       // Add default model directory - this is model functionality provided by the mzen-server package
       this.modelManager.config.modelDirs.unshift(__dirname + '/model');
 
+      await this.bootInitScripts('00-init');
+
       await this.modelManager.init();
+      await this.bootInitScripts('01-model-initialised');
+
       await this.loadResources();
+      await this.bootInitScripts('02-resources-loaded');
+
       await this.registerServiceEndpoints();
       await this.registerRepoApiEndpoints();
+      await this.bootInitScripts('03-endpoints-registered');
 
       this.app.use(bodyParser.json()); // for parsing application/json
       this.app.use(bodyParser.text());
       this.app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
   
-      await this.bootInitScripts()
+      await this.bootInitScripts();
   
       this.app.use(this.config.path, this.router);
+      await this.bootInitScripts('04-router-mounted');
+
       this.app.use((err, req, res, next) => {
         this.logger.error({err, req, res});
         res.status(500).send('Something broke!');
@@ -87,11 +97,11 @@ export class Server
     }
   }
   
-  async bootInitScripts()
+  async bootInitScripts(stage?: string)
   {
     const loader = new ResourceLoader({
       dirPaths: [this.config.appDir],
-      subdir: this.config.initDirName
+      subdir: stage ? this.config.initDirName + '/' + stage : this.config.initDirName
     });
 
     var filePaths = loader.getResourcePaths();
