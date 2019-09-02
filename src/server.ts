@@ -81,9 +81,6 @@ export class Server
       this.app.use(bodyParser.json()); // for parsing application/json
       this.app.use(bodyParser.text());
       this.app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-  
-      await this.bootInitScripts();
-  
       this.app.use(this.config.path, this.router);
       await this.bootInitScripts('04-router-mounted');
 
@@ -92,6 +89,8 @@ export class Server
         res.status(500).send('Something broke!');
         next();
       });
+
+      await this.bootInitScripts('99-final');
 
       this.initialised = true;
     }
