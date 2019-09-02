@@ -116,11 +116,11 @@ export class ServerRemoteObject
               if (contentType) res.type(contentType);
               res.status(code).send(response);
             }
-          } catch (error) {
+          } catch (err) {
             var errorHandled = false;
             if (Object.keys(errorEndpointResponses).length) {
               for (var errorName in errorEndpointResponses) {
-                if (errorName !== error.constructor.name) continue;
+                if (errorName !== err.constructor.name) continue;
 
                 const errorConfig = errorEndpointResponses[errorName] as ServerApiConfigEndpointResponse;
                 const schemaConfig = errorConfig.schema ? errorConfig.schema : null;
@@ -129,14 +129,14 @@ export class ServerRemoteObject
                 const contentType = httpConfig.contentType ? httpConfig.contentType : 'json';
 
                 const validateResultError: SchemaValidationResult = (
-                  schemaConfig ? await (new Schema(schemaConfig)).validate(error) : {isValid: true} 
+                  schemaConfig ? await (new Schema(schemaConfig)).validate(err) : {isValid: true} 
                 );
                 if (validateResultError.isValid) {
                   if (contentType == 'json') {
-                    res.status(code).json(error);
+                    res.status(code).json(err);
                   } else {
                     if (contentType) res.type(contentType);
-                    res.status(code).send(error);
+                    res.status(code).send(err);
                   }
                 }
                 errorHandled = true;
@@ -145,12 +145,12 @@ export class ServerRemoteObject
               }
             }
             const isInTest = typeof global.it === 'function'; // dont log anything when in automated test enviroment
-            if (!isInTest && (error.ref == undefined || error.logged || !errorHandled)) {
-              // Errors which have a defined are expected to be handled by the client so we dont need to log them
+            if (!isInTest && (err.ref == undefined || err.logged || !errorHandled)) {
+              // Errors which have a ref defined are expected to be handled by the client so we dont need to log them
               // Errors which do not have a ref are not expected by the client and must be logged
-              // Errors which have a ref may be forced to log if the logged value is set
+              // Errors which have a ref may be forced to log if the logged flag value is set to true
               // Unhandled errors are not expected by either the server or the client and must be logged
-              this.logger.error({error, req: this.requestMin(req)});
+              this.logger.error({err, req: this.requestMin(req)});
             }
             if (!errorHandled) {
               // Default error response
