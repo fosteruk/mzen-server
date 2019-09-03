@@ -46,13 +46,14 @@ export class Server
     this.server = null;
     this.router = express.Router();
     this.aclRoleAssessor = {};
-    this.setLogger(console);
+    this.logger = console;
     this.initialised = false;
   }
   
   setLogger(logger)
   {
     this.logger = logger;
+    this.modelManager.setLogger(logger);
     return this;
   }
   
