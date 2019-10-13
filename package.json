@@ -30,7 +30,7 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "bcrypt": "^3.0.4",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.15.2",
     "clone": "^1.0.2",
     "express": "^4.16.0",

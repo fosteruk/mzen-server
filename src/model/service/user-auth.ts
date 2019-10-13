@@ -1,6 +1,6 @@
 import ServerService from '../../service';
 import { ServerErrorUnauthorized, ServerErrorNotFound } from '../../error';
-import bcrypt = require('bcrypt');
+import bcryptjs = require('bcryptjs');
 import crypto = require('crypto');
 
 export class ServiceUserAuth extends ServerService
@@ -51,7 +51,7 @@ export class ServiceUserAuth extends ServerService
   }
   async create(email, password)
   {
-    var hash = await bcrypt.hash(password, 11);
+    var hash = await bcryptjs.hash(password, 11);
     return this.repos.user.insertOne({
       email: email,
       password: hash
@@ -65,8 +65,8 @@ export class ServiceUserAuth extends ServerService
       throw new ServerErrorUnauthorized;
     }
 
-    var bcryptRes = await bcrypt.compare(password, user.password);
-    if (!bcryptRes) {
+    var bcryptjsRes = await bcryptjs.compare(password, user.password);
+    if (!bcryptjsRes) {
       throw new ServerErrorUnauthorized;
     }
 
