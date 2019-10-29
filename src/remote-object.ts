@@ -62,7 +62,7 @@ export class ServerRemoteObject
       const verbs = endpointConfig.verbs ? endpointConfig.verbs : ['get'];
       const method = endpointConfig.method ? endpointConfig.method : '';
       const path = endpointConfig.path ? endpointConfig.path : method;
-      const methodArgsConfig = endpointConfig.args ? endpointConfig.args : [];
+      const methodArgsConfig = endpointConfig.args ? endpointConfig.args : {};
       const priority = endpointConfig.priority != undefined ? endpointConfig.priority : 0;
 
       const response = endpointConfig.response ? endpointConfig.response : {};
@@ -103,7 +103,9 @@ export class ServerRemoteObject
 
             // If method args were specified as an array they are passed in to the remote method in order
             // If method args were specified as an object the remote method gets that object as a single argument
-            const methodArgs = Array.isArray(methodArgsConfig) ? this.buildMethodArgArray(methodArgsConfig, requestArgs) : [requestArgs];
+            const methodArgs = Array.isArray(methodArgsConfig) 
+              ? this.buildMethodArgArray(methodArgsConfig, requestArgs) 
+              : [requestArgs];
 
             const response = await this.object[method].apply(this.object, methodArgs);
 
