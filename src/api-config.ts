@@ -4,7 +4,9 @@ export interface ServerApiConfigEndpointArg
 {
   name?: string; // if name is not specified defaults to srcKey
   srcKey?: string; 
-  src?: string; 
+  src?:'param'|'query'|'header'|'body'|'request'
+    |'response'|'aclContext'|'aclConditions'
+    |string; 
   required?: boolean; 
   notNull?: boolean; 
   notEmpty?: boolean;

@@ -2,7 +2,6 @@ import ServerAcl from './acl';
 import { Schema, SchemaValidationResult } from 'mzen';
 import { ServerError, ServerErrorUnauthorized, serverErrorApiEndpointResponseConfig } from './error';
 import { ServerApiConfigAcl, ServerApiConfigEndpoint, ServerApiConfigEndpointResponse } from './api-config';
-import clone = require('clone');
 
 export interface ServerRemoteObjectConfig
 {
@@ -78,7 +77,7 @@ export class ServerRemoteObject
         let middlewareCallback = async (req, res) => {
           const requestArgs = this.parseRequestArgs(methodArgsConfig, req, res);
           const validationSpec = this.parseValidationSpec(methodArgsConfig);
-          const aclContext = clone(requestArgs);
+          const aclContext = {};
           const argValidateSchema = new Schema(validationSpec);
           const validateResult = await argValidateSchema.validate(requestArgs);
 
