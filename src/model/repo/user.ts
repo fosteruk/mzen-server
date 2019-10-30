@@ -14,7 +14,9 @@ export class RepoUser extends ServerRepo
         created: {$type: Date, $filter: {defaultValue: 'now'}}
       },
       api: {
-        endpointGroupsDisable: {read: true}
+        endpoint:{
+          disableGroup: {read: true}
+        }
       }
     });
   }

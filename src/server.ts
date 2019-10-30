@@ -144,9 +144,11 @@ export class Server
     {
       const service = services[serviceName] as ServerService;
       const apiConfig = service.config.api ? service.config.api : {};
+      const path = apiConfig.path != null ? apiConfig.path : '/service';
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
-      const endpointsDisable = apiConfig.endpointsDisable ? apiConfig.endpointsDisable : {};
-      const endpointGroupsDisable = apiConfig.endpointGroupsDisable ? apiConfig.endpointGroupsDisable : {};
+      const endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
+      const endpointsDisable = endpoint.disable ? endpoint.disable : {};
+      const endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
       var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
       
       // Remove any enpoints that have been disabled
@@ -154,13 +156,14 @@ export class Server
         var groups = endpoints[endpointName].groups;
         if (Array.isArray(groups)) {
           groups.forEach(function(group){
-            if (endpoints[endpointName] && endpointGroupsDisable[group] == true) delete endpoints[endpointName]
+            if (endpoints[endpointName] && endpointDisableGroup[group] == true) delete endpoints[endpointName]
           });
         }
         if (endpoints[endpointName] && endpointsDisable[endpointName] == true) delete endpoints[endpointName];
       }
 
-      if (Object.keys(endpoints).length == 0) continue; // This repo has no end points - nothing more to do
+       // This service has no end points - nothing more to do
+      if (Object.keys(endpoints).length == 0) continue;
 
       const aclConfig = {
         rules: repoAclConfig.rules,
@@ -174,7 +177,7 @@ export class Server
       }
 
       const remoteConfig = {
-        path: '/service/' + camelToKebab(serviceName),
+        path: camelToKebab(path) + '/' + camelToKebab(serviceName),
         endpoints: endpoints
       };
 
@@ -193,10 +196,12 @@ export class Server
     {
       const repo = repos[repoName] as ServerRepo;
       const apiConfig = repo.config.api ? repo.config.api: {};
+      const path = apiConfig.path != null ? apiConfig.path : '/repo';
       const enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
-      const endpointsDisable = apiConfig.endpointsDisable ? apiConfig.endpointsDisable : {};
-      const endpointGroupsDisable = apiConfig.endpointGroupsDisable ? apiConfig.endpointGroupsDisable : {};
+      const endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
+      const endpointsDisable = endpoint.disable ? endpoint.disable : {};
+      const endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
       var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
 
       if (!enable) continue;
@@ -206,7 +211,7 @@ export class Server
         var groups = endpoints[endpointName].groups;
         if (Array.isArray(groups)) {
           groups.forEach(function(group){
-            if (endpoints[endpointName] && endpointGroupsDisable[group] == true) delete endpoints[endpointName]
+            if (endpoints[endpointName] && endpointDisableGroup[group] == true) delete endpoints[endpointName]
           });
         }
         if (endpoints[endpointName] && endpointsDisable[endpointName] == true) delete endpoints[endpointName];
@@ -226,7 +231,7 @@ export class Server
       }
 
       const remoteConfig = {
-        path: '/repo/' + camelToKebab(repoName),
+        path: camelToKebab(path) + '/' + camelToKebab(repoName),
         endpoints: endpoints
       };
       var remoteObject = new ServerRemoteObject(repos[repoName], remoteConfig);

@@ -4,9 +4,10 @@ export interface ServerApiConfigEndpointArg
 {
   name?: string; // if name is not specified defaults to srcKey
   srcKey?: string; 
-  src?:'param'|'query'|'header'|'body'|'request'
-    |'response'|'aclContext'|'aclConditions'
-    |string; 
+  src?:
+    'param'|'query'|'header'|'body'|'request'
+    | 'response'|'aclContext'|'aclConditions'
+    | string; 
   required?: boolean; 
   notNull?: boolean; 
   notEmpty?: boolean;
@@ -37,9 +38,9 @@ export interface ServerApiConfigEndpointResponse
 export interface ServerApiConfigEndpoint
 {
   path?: string;
-  groups?: Array<string>;
+  groups?: Array<'default'|'read'|'write'|string>;
   method?: string;
-  verbs?: Array<string>;
+  verbs?: Array<'get'|'put'|'post'|'delete'|string>;
   args?: Array<ServerApiConfigEndpointArg> | {[key: string]: ServerApiConfigEndpointArg};
   acl?: ServerApiConfigAcl;
   priority?: number,
@@ -52,11 +53,14 @@ export interface ServerApiConfigEndpoint
 export interface ServerApiConfig
 {
   enable?: boolean;
-  endpointsDisable?: {[key: string]: boolean};
-  endpointGroupsDisable?: {default?: boolean, [key: string]: boolean};
+  path?: string|null;
+  endpoint?: {
+    disable?: {[key: string]: boolean},
+    disableGroup?: {default?: boolean, [key: string]: boolean}
+  };
   acl?: ServerApiConfigAcl;
-  endpoints?: {[key: string]: ServerApiConfigEndpoint};
   maxResults?: number;
+  endpoints?: {[key: string]: ServerApiConfigEndpoint};
 }
 
 export default ServerApiConfig;
