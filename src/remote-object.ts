@@ -77,7 +77,7 @@ export class ServerRemoteObject
         let middlewareCallback = async (req, res) => {
           const requestArgs = this.parseRequestArgs(methodArgsConfig, req, res);
           const validationSpec = this.parseValidationSpec(methodArgsConfig);
-          const aclContext = {};
+          const aclContext = {...requestArgs};
           const argValidateSchema = new Schema(validationSpec);
           const validateResult = await argValidateSchema.validate(requestArgs);
 
