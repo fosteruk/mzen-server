@@ -146,7 +146,7 @@ export class Server
       var apiConfig = service.config.api ? service.config.api : {};
       var path = apiConfig.path != null ? apiConfig.path : '/service/' + camelToKebab(serviceName);
       var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
-      var repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
+      var aclConfig = apiConfig.acl ? apiConfig.acl : {};
       var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
       var endpointsDisable = endpoint.disable ? endpoint.disable : {};
       var endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
@@ -168,11 +168,10 @@ export class Server
        // This service has no end points - nothing more to do
       if (Object.keys(endpoints).length == 0) continue;
 
-      var aclConfig = {
-        rules: repoAclConfig.rules,
-        endpoints: endpoints
-      };
-      var acl = new ServerAcl(aclConfig);
+      var acl = new ServerAcl({
+        rules: aclConfig.rules,
+        endpoints
+      });
       acl.loadDefaultRoleAssessors();
       acl.setRepos(this.modelManager.repos);
       for (var role in this.aclRoleAssessor) {
@@ -195,7 +194,7 @@ export class Server
       var apiConfig = repo.config.api ? repo.config.api: {};
       var path = apiConfig.path != null ? apiConfig.path : '/repo/' + camelToKebab(repoName);
       var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
-      var repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
+      var aclConfig = apiConfig.acl ? apiConfig.acl : {};
       var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
       var endpointsDisable = endpoint.disable ? endpoint.disable : {};
       var endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
@@ -216,11 +215,10 @@ export class Server
 
       if (Object.keys(endpoints).length == 0) continue; // This repo has no end points - nothing more to do
       
-      var aclConfig = {
-        rules: repoAclConfig.rules,
-        endpoints: endpoints
-      };
-      var acl = new ServerAcl(aclConfig);
+      var acl = new ServerAcl({
+        rules: aclConfig.rules,
+        endpoints
+      });
       acl.loadDefaultRoleAssessors();
       acl.setRepos(this.modelManager.repos);
       for (var role in this.aclRoleAssessor) {
