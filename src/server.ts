@@ -144,7 +144,7 @@ export class Server
     {
       const service = services[serviceName] as ServerService;
       const apiConfig = service.config.api ? service.config.api : {};
-      const path = apiConfig.path != null ? apiConfig.path : '/service';
+      const path = apiConfig.path != null ? apiConfig.path : '/service/' + camelToKebab(serviceName);
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
       const endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
       const endpointsDisable = endpoint.disable ? endpoint.disable : {};
@@ -176,10 +176,7 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      const remoteConfig = {
-        path: camelToKebab(path) + '/' + camelToKebab(serviceName),
-        endpoints: endpoints
-      };
+      const remoteConfig = {path, endpoints};
 
       var remoteObject = new ServerRemoteObject(services[serviceName], remoteConfig);
       remoteObject.setLogger(this.logger);
@@ -196,7 +193,7 @@ export class Server
     {
       const repo = repos[repoName] as ServerRepo;
       const apiConfig = repo.config.api ? repo.config.api: {};
-      const path = apiConfig.path != null ? apiConfig.path : '/repo';
+      const path = apiConfig.path != null ? apiConfig.path : '/repo/' + camelToKebab(repoName);
       const enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
       const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
       const endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
@@ -230,10 +227,7 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      const remoteConfig = {
-        path: camelToKebab(path) + '/' + camelToKebab(repoName),
-        endpoints: endpoints
-      };
+      const remoteConfig = {path, endpoints};
       var remoteObject = new ServerRemoteObject(repos[repoName], remoteConfig);
       remoteObject.setLogger(this.logger);
       remoteObject.setAcl(acl);
