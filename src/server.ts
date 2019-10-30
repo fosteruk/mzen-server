@@ -142,16 +142,19 @@ export class Server
     const services = this.modelManager.services;
     for (let serviceName in services)
     {
-      const service = services[serviceName] as ServerService;
-      const apiConfig = service.config.api ? service.config.api : {};
-      const path = apiConfig.path != null ? apiConfig.path : '/service/' + camelToKebab(serviceName);
-      const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
-      const endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
-      const endpointsDisable = endpoint.disable ? endpoint.disable : {};
-      const endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
+      var service = services[serviceName] as ServerService;
+      var apiConfig = service.config.api ? service.config.api : {};
+      var path = apiConfig.path != null ? apiConfig.path : '/service/' + camelToKebab(serviceName);
+      var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
+      var repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
+      var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
+      var endpointsDisable = endpoint.disable ? endpoint.disable : {};
+      var endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
       var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
+
+      if (!enable) continue;
       
-      // Remove any enpoints that have been disabled
+      // Remove any endpoints that have been disabled
       for (var endpointName in endpoints) {
         var groups = endpoints[endpointName].groups;
         if (Array.isArray(groups)) {
@@ -165,7 +168,7 @@ export class Server
        // This service has no end points - nothing more to do
       if (Object.keys(endpoints).length == 0) continue;
 
-      const aclConfig = {
+      var aclConfig = {
         rules: repoAclConfig.rules,
         endpoints: endpoints
       };
@@ -176,9 +179,7 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      const remoteConfig = {path, endpoints};
-
-      var remoteObject = new ServerRemoteObject(services[serviceName], remoteConfig);
+      var remoteObject = new ServerRemoteObject(services[serviceName], {path, endpoints});
       remoteObject.setLogger(this.logger);
       remoteObject.setAcl(acl);
       remoteObject.initRouter(this.router);
@@ -188,22 +189,21 @@ export class Server
   registerRepoApiEndpoints()
   {
     const repos = this.modelManager.repos;
-
     for (var repoName in repos)
     {
-      const repo = repos[repoName] as ServerRepo;
-      const apiConfig = repo.config.api ? repo.config.api: {};
-      const path = apiConfig.path != null ? apiConfig.path : '/repo/' + camelToKebab(repoName);
-      const enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
-      const repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
-      const endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
-      const endpointsDisable = endpoint.disable ? endpoint.disable : {};
-      const endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
+      var repo = repos[repoName] as ServerRepo;
+      var apiConfig = repo.config.api ? repo.config.api: {};
+      var path = apiConfig.path != null ? apiConfig.path : '/repo/' + camelToKebab(repoName);
+      var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
+      var repoAclConfig = apiConfig.acl ? apiConfig.acl : {};
+      var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
+      var endpointsDisable = endpoint.disable ? endpoint.disable : {};
+      var endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
       var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
 
       if (!enable) continue;
 
-      // Remove any enpoints that have been disabled
+      // Remove any endpoints that have been disabled
       for (var endpointName in endpoints) {
         var groups = endpoints[endpointName].groups;
         if (Array.isArray(groups)) {
@@ -216,7 +216,7 @@ export class Server
 
       if (Object.keys(endpoints).length == 0) continue; // This repo has no end points - nothing more to do
       
-      const aclConfig = {
+      var aclConfig = {
         rules: repoAclConfig.rules,
         endpoints: endpoints
       };
@@ -227,8 +227,7 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      const remoteConfig = {path, endpoints};
-      var remoteObject = new ServerRemoteObject(repos[repoName], remoteConfig);
+      var remoteObject = new ServerRemoteObject(repos[repoName], {path, endpoints});
       remoteObject.setLogger(this.logger);
       remoteObject.setAcl(acl);
       remoteObject.initRouter(this.router);
