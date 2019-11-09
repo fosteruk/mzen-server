@@ -36,13 +36,15 @@ export class ServerAcl
   async populateContext(request, context?)
   {
     // Initialise assessors in order of priority
-    Object.values(this.roleAssessor)
+    const sortedRoleAssessors = Object.values(this.roleAssessor)
     .sort((a:ServerAclRoleAssessor, b:ServerAclRoleAssessor) => {
       // Higher priority returns first
       return b.priority - a.priority;
-    }).forEach(async (roleAssessor) => {
-      await roleAssessor.initContext(request, context);
     });
+    
+    for (const roleAssessor of sortedRoleAssessors) {
+      await roleAssessor.initContext(request, context);
+    }
 
     return true;
   }
