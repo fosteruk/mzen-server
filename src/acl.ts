@@ -40,17 +40,9 @@ export class ServerAcl
     .sort((a:ServerAclRoleAssessor, b:ServerAclRoleAssessor) => {
       // Higher priority returns first
       return b.priority - a.priority;
-    }).map(roleAssessor => {
-      return (async() => {
-        roleAssessor.initContext(request, context);
-      });
-    }).reduce(
-      async (previousPromise, nextAsyncFunction) => {
-        await previousPromise;
-        await nextAsyncFunction();
-      }, 
-      Promise.resolve()
-    );
+    }).forEach(async (roleAssessor) => {
+      await roleAssessor.initContext(request, context);
+    });
   }
   
   isPermitted(endpointName, context?)
