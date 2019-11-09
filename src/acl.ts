@@ -1,3 +1,4 @@
+import ServerAclRoleAssessor from './acl/role-assessor';
 import RoleAssessorAll from './acl/role-assessor/all';
 
 export interface ServerAclConfigRule
@@ -15,7 +16,7 @@ export interface ServerAclConfig
 export class ServerAcl
 {
   config: ServerAclConfig;
-  roleAssessor: {[key: string]: any};
+  roleAssessor: {[key: string]: ServerAclRoleAssessor};
   repos: {[key: string]: any};
   
   constructor(options?: ServerAclConfig)
@@ -32,14 +33,24 @@ export class ServerAcl
     this.addRoleAssessor(new RoleAssessorAll);
   }
   
-  populateContext(request, context?)
+  async populateContext(request, context?)
   {
-    // Initialise assessors
-    var promises = [];
-    for (var role in this.roleAssessor) {
-      promises.push(this.roleAssessor[role].initContext(request, context));
-    }
-    return Promise.all(promises);
+    // Initialise assessors in order of priority
+    return Object.values(this.roleAssessor)
+    .sort((a:ServerAclRoleAssessor, b:ServerAclRoleAssessor) => {
+      // Higher priority returns first
+      return b.priority - a.priority;
+    }).map(roleAssessor => {
+      return (async() => {
+        roleAssessor.initContext(request, context);
+      });
+    }).reduce(
+      async (previousPromise, nextAsyncFunction) => {
+        await previousPromise;
+        await nextAsyncFunction();
+      }, 
+      Promise.resolve()
+    );
   }
   
   isPermitted(endpointName, context?)

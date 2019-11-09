@@ -1,12 +1,14 @@
 export class ServerAclRoleAssessor 
 {
-  role: string;
-  repos: {[key: string]: any};
+  role:string;
+  repos:{[key: string]: any};
+  priority:number;
   
   constructor(role?)
   {
     this.role = role ? role : '';
     this.repos = {};
+    this.priority = 0;
   }
   
   // @ts-ignore - 'request' is declared but its value is never read
