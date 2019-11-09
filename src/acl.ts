@@ -36,13 +36,15 @@ export class ServerAcl
   async populateContext(request, context?)
   {
     // Initialise assessors in order of priority
-    return Object.values(this.roleAssessor)
+    Object.values(this.roleAssessor)
     .sort((a:ServerAclRoleAssessor, b:ServerAclRoleAssessor) => {
       // Higher priority returns first
       return b.priority - a.priority;
     }).forEach(async (roleAssessor) => {
       await roleAssessor.initContext(request, context);
     });
+
+    return true;
   }
   
   isPermitted(endpointName, context?)
