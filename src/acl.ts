@@ -17,6 +17,7 @@ export class ServerAcl
 {
   config: ServerAclConfig;
   roleAssessor: {[key: string]: ServerAclRoleAssessor};
+  initcontextGroups: {[key: number]: [ServerAclRoleAssessor]};
   repos: {[key: string]: any};
   
   constructor(options?: ServerAclConfig)
@@ -36,14 +37,26 @@ export class ServerAcl
   async populateContext(request, context?)
   {
     // Initialise assessors in order of priority
-    const sortedRoleAssessors = Object.values(this.roleAssessor)
-    .sort((a:ServerAclRoleAssessor, b:ServerAclRoleAssessor) => {
-      // Higher priority returns first
-      return b.priority - a.priority;
-    });
+    const roleAssessors = Object.values(this.roleAssessor);
+
+    // Assessors grouped by priority
+    const roleAssessorsGrouped = Object.values(roleAssessors)
+    .reduce((groups, roleAssessor) => {
+      if (groups[roleAssessor.priority] == undefined) groups[roleAssessor.priority] = [];
+      groups[roleAssessor.priority].push(roleAssessor);
+      return groups;
+    }, []);
+
+    // High priority should be at the start of the array
+    roleAssessorsGrouped
+      .reverse()
+      .filter(group => group != undefined);
     
-    for (const roleAssessor of sortedRoleAssessors) {
-      await roleAssessor.initContext(request, context);
+    // Execute init context groups in order
+    for (const group of roleAssessorsGrouped) {
+      await Promise.all(group.map(
+        roleAssessor => roleAssessor.initContext(request, context)
+      ));
     }
 
     return true;
