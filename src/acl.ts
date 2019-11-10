@@ -40,7 +40,7 @@ export class ServerAcl
     const roleAssessors = Object.values(this.roleAssessor);
 
     // Assessors grouped by priority
-    const roleAssessorsGrouped = Object.values(roleAssessors)
+    let roleAssessorsGrouped = Object.values(roleAssessors)
     .reduce((groups, roleAssessor) => {
       if (groups[roleAssessor.priority] == undefined) groups[roleAssessor.priority] = [];
       groups[roleAssessor.priority].push(roleAssessor);
@@ -48,7 +48,8 @@ export class ServerAcl
     }, []);
 
     // High priority should be at the start of the array
-    roleAssessorsGrouped
+    roleAssessorsGrouped = 
+      roleAssessorsGrouped
       .reverse()
       .filter(group => group != undefined);
     
