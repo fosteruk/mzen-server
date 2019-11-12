@@ -452,6 +452,38 @@ describe('ServerRemoteObject', function(){
       await middlewareConfigs[0].callback(reqGetAll, resGetAll);
       should(resGetAll.mockData).eql('a');
     });
+    it('injects configured config field as argument to remote method', async () => {
+      var targetObject = {
+        getAll: function(test){
+          return Promise.resolve(test);
+        }
+      };
+
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/all',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [
+              {srcKey: 'test', src: 'config'}
+            ]
+          }
+        },
+        server: {
+          test: 123
+        }
+      };
+
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+
+      var reqGetAll = new ExpressMockRequest();
+      var resGetAll = new ExpressMockResponse();
+      await middlewareConfigs[0].callback(reqGetAll, resGetAll);
+      should(resGetAll.mockData).eql(123);
+    });
     it('returns 200 response code by default', async () => {
       var targetObject = {
         save: function(){

@@ -81,7 +81,7 @@ export class Server
 
       this.app.use(bodyParser.json()); // for parsing application/json
       this.app.use(bodyParser.text());
-      this.app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+      this.app.use(bodyParser.urlencoded({extended: true})); // for parsing application/x-www-form-urlencoded
       this.app.use(this.config.path, this.router);
       await this.bootInitScripts('04-router-mounted');
 
@@ -108,7 +108,7 @@ export class Server
     
     // Sort by filename
     // - the order of execution is important so files should be named to give the correct order
-    filePaths.sort((a, b) =>  (path.basename(a) > path.basename(b) ? 1 : 0));
+    filePaths.sort((a, b) => (path.basename(a) > path.basename(b) ? 1 : 0));
 
     filePaths.forEach(async filePath => {
       let initFunction = ResourceLoader.loadModule(filePath);
@@ -178,7 +178,11 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      var remoteObject = new ServerRemoteObject(services[serviceName], {path, endpoints});
+      var remoteObject = new ServerRemoteObject(services[serviceName], {
+        path, 
+        endpoints,
+        server: this.config
+      });
       remoteObject.setLogger(this.logger);
       remoteObject.setAcl(acl);
       remoteObject.initRouter(this.router);
@@ -225,7 +229,11 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      var remoteObject = new ServerRemoteObject(repos[repoName], {path, endpoints});
+      var remoteObject = new ServerRemoteObject(repos[repoName], {
+        path, 
+        endpoints,
+        server: this.config
+      });
       remoteObject.setLogger(this.logger);
       remoteObject.setAcl(acl);
       remoteObject.initRouter(this.router);

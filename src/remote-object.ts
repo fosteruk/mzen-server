@@ -1,4 +1,5 @@
 import ServerAcl from './acl';
+import { ServerConfig } from './server';
 import { Schema, SchemaValidationResult } from 'mzen';
 import { ServerError, ServerErrorUnauthorized, serverErrorApiEndpointResponseConfig } from './error';
 import { ServerApiConfigAcl, ServerApiConfigEndpoint, ServerApiConfigEndpointResponse } from './api-config';
@@ -8,6 +9,7 @@ export interface ServerRemoteObjectConfig
   path?: string;
   acl?: ServerApiConfigAcl;
   endpoints?: {[key: string]: ServerApiConfigEndpoint};
+  server?: ServerConfig;
 }
 
 export class ServerRemoteObject
@@ -26,6 +28,7 @@ export class ServerRemoteObject
     this.config.endpoints = this.config.endpoints ? this.config.endpoints : {};
     this.config.acl = this.config.acl ? this.config.acl : {};
     this.config.acl.rules = this.config.acl.rules ? this.config.acl.rules : [];
+    this.config.server = this.config.server ? this.config.server : {};
 
     this.object = object;
     this.acl = new ServerAcl;
@@ -254,6 +257,7 @@ export class ServerRemoteObject
     const params = req.params ? req.params : {};
     const aclContext = req.aclContext ? req.aclContext : {};
     const aclConditions = req.aclConditions ? req.aclConditions: {};
+    const config = this.config.server ? this.config.server: {};
 
     switch (src) {
       case 'param':
@@ -273,6 +277,9 @@ export class ServerRemoteObject
       break;
       case 'response':
         value = srcKey ? res[srcKey] : res;
+      break;
+      case 'config':
+        value = srcKey ? config[srcKey] : config;
       break;
       case 'aclContext':
         value = srcKey ? aclContext[srcKey] : aclContext;
