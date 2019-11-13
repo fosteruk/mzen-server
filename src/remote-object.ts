@@ -236,7 +236,8 @@ export class ServerRemoteObject
         // First attempt to retrieve the value for the argument
         const src = argConfig.src ? argConfig.src : null;
         const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
-        const name = argConfig.name ? argConfig.name : srcPath;
+        const srcKey = argConfig.srcKey ? argConfig.srcKey : srcPath;
+        const name = argConfig.name ? argConfig.name : srcKey;
         values[name] = this.parseOneRequestArg(argConfig, req, res);
       });
     } else {
@@ -254,15 +255,12 @@ export class ServerRemoteObject
     const srcKey = methodArgConfig.srcKey ? methodArgConfig.srcKey : null;
     const srcPath = methodArgConfig.srcPath ? methodArgConfig.srcPath : null;
 
-    req = req ? req : {};
-    res = res ? res : {};
-
     const srcObjects = {
       param: req.params ? req.params : {},
       query: req.query ? req.query : {},
       body: req.body ? req.body : {},
-      request: req ? req : {},
-      response: res ? res : {},
+      request: req,
+      response: res,
       config: this.config.server ? this.config.server : {},
       aclContext: req.aclContext ? req.aclContext : {},
       aclConditions: req.aclConditions ? req.aclConditions: {}
@@ -270,8 +268,8 @@ export class ServerRemoteObject
 
     if (src == 'header') {
       if (srcKey || srcPath) {
-        value = srcPath && req.get 
-          ? req.get(srcKey ? srcKey : srcPath) 
+        value = srcPath && srcObjects.request.get 
+          ? srcObjects.request.get(srcKey ? srcKey : srcPath) 
           : null;
       }
     } else {
