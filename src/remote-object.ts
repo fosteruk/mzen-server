@@ -1,6 +1,10 @@
 import ServerAcl from './acl';
 import { ServerConfig } from './server';
-import { Schema, SchemaValidationResult } from 'mzen';
+import { 
+  Schema, 
+  SchemaValidationResult, 
+  ObjectPathAccessor 
+} from 'mzen';
 import { ServerError, ServerErrorUnauthorized, serverErrorApiEndpointResponseConfig } from './error';
 import { ServerApiConfigAcl, ServerApiConfigEndpoint, ServerApiConfigEndpointResponse } from './api-config';
 
@@ -183,8 +187,8 @@ export class ServerRemoteObject
     var args = [];
     methodArgsConfigArray.forEach((argConfig) => {
       const src = argConfig.src ? argConfig.src : null;
-      const srcKey = argConfig.srcKey ? argConfig.srcKey : src;
-      const name = argConfig.name ? argConfig.name : srcKey;
+      const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
+      const name = argConfig.name ? argConfig.name : srcPath;
       args.push(requestArgs[name]);
     });
     if (requestArgs.aclContext) args.push(requestArgs.aclContext);
@@ -197,8 +201,8 @@ export class ServerRemoteObject
     var spec = {};
 
     var parseOne = function(argConfig, key?){
-      const srcKey = argConfig.srcKey ? argConfig.srcKey : null;
-      const name = key ? key : (argConfig.name ? argConfig.name : srcKey);
+      const srcPath = argConfig.srcPath ? argConfig.srcPath : null;
+      const name = key ? key : (argConfig.name ? argConfig.name : srcPath);
       const type = argConfig.type ? argConfig.type : null;
 
       spec[name] = {};
@@ -231,8 +235,8 @@ export class ServerRemoteObject
       methodArgsConfig.forEach(argConfig => {
         // First attempt to retrieve the value for the argument
         const src = argConfig.src ? argConfig.src : null;
-        const srcKey = argConfig.srcKey ? argConfig.srcKey : src;
-        const name = argConfig.name ? argConfig.name : srcKey;
+        const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
+        const name = argConfig.name ? argConfig.name : srcPath;
         values[name] = this.parseOneRequestArg(argConfig, req, res);
       });
     } else {
@@ -247,7 +251,7 @@ export class ServerRemoteObject
   {
     var value = undefined;
     const src = methodArgConfig.src ? methodArgConfig.src : 'query';
-    const srcKey = methodArgConfig.srcKey ? methodArgConfig.srcKey : null;
+    const srcPath = methodArgConfig.srcPath ? methodArgConfig.srcPath : null;
 
     req = req ? req : {};
     res = res ? res : {};
@@ -261,31 +265,49 @@ export class ServerRemoteObject
 
     switch (src) {
       case 'param':
-        value = srcKey ? params[srcKey] : params;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, params) 
+          : params;
       break;
       case 'query':
-        value = srcKey ? query[srcKey] : query;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, query) 
+          : query;
       break;
       case 'header':
-        value = srcKey && req.get ? req.get(srcKey) : null;
+        value = srcPath && req.get 
+          ? req.get(srcPath) 
+          : null;
       break;
       case 'body':
-        value = srcKey ? body[srcKey] : body;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, body) 
+          : body;
       break;
       case 'request':
-        value = srcKey ? req[srcKey] : req;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, req) 
+          : req;
       break;
       case 'response':
-        value = srcKey ? res[srcKey] : res;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, res) 
+          : res;
       break;
       case 'config':
-        value = srcKey ? config[srcKey] : config;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, config) 
+          : config;
       break;
       case 'aclContext':
-        value = srcKey ? aclContext[srcKey] : aclContext;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, aclContext) 
+          : aclContext;
       break;
       case 'aclConditions':
-        value = srcKey ? aclConditions[srcKey] : aclConditions;
+        value = srcPath 
+          ? ObjectPathAccessor.getPath(srcPath, aclConditions)
+          : aclConditions;
       break;
     }
 

@@ -2,8 +2,9 @@ import { Schema } from 'mzen';
 
 export interface ServerApiConfigEndpointArg
 {
-  name?: string; // if name is not specified defaults to srcKey
-  srcKey?: string; 
+  // if name is not specified defaults to srcPath
+  name?: string; 
+  srcPath?: string; 
   src?:
     'param'|'query'|'header'|'body'|'request'
     | 'response'|'aclContext'|'aclConditions'

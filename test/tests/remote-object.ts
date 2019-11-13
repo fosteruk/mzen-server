@@ -176,7 +176,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcKey: 'content', src: 'body'}
+              {srcPath: 'content', src: 'body'}
             ]
           }
         }
@@ -205,7 +205,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: {
-              thebody: {srcKey: 'content', src: 'body'}
+              thebody: {srcPath: 'content', src: 'body'}
             }
           }
         }
@@ -234,7 +234,7 @@ describe('ServerRemoteObject', function(){
             method: 'getByPkey',
             verbs: ['get'],
             args: [
-              {srcKey: 'pkey', src: 'param'}
+              {srcPath: 'pkey', src: 'param'}
             ]
           }
         }
@@ -248,7 +248,7 @@ describe('ServerRemoteObject', function(){
       await middlewareConfigs[0].callback(reqGetByPkey, resGetByPkey);
       should(resGetByPkey.mockData).eql(123);
     });
-    it('injects configured params as argument to remote method', async () => {
+    it('injects configured param as argument to remote method', async () => {
       var targetObject = {
         getByPkey: function(params){
           return Promise.resolve(params);
@@ -292,7 +292,7 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcKey: 'offset', src: 'query'}
+              {srcPath: 'offset', src: 'query'}
             ]
           }
         }
@@ -379,7 +379,7 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcKey: 'query', src: 'request'}
+              {srcPath: 'query', src: 'request'}
             ]
           }
         }
@@ -437,7 +437,7 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcKey: 'test', src: 'response'}
+              {srcPath: 'test', src: 'response'}
             ]
           }
         }
@@ -467,12 +467,50 @@ describe('ServerRemoteObject', function(){
             method: 'getAll',
             verbs: ['get'],
             args: [
-              {srcKey: 'test', src: 'config'}
+              {srcPath: 'test', src: 'config'}
             ]
           }
         },
         server: {
           test: 123
+        }
+      };
+
+      var remoteObject = new ServerRemoteObject(targetObject, config);
+      var middlewareConfigs = remoteObject.getMiddlewareConfig();
+
+      var reqGetAll = new ExpressMockRequest();
+      var resGetAll = new ExpressMockResponse();
+      await middlewareConfigs[0].callback(reqGetAll, resGetAll);
+      should(resGetAll.mockData).eql(123);
+    });
+    it('injects configured config field path as argument to remote method', async () => {
+      var targetObject = {
+        getAll: function(test){
+          return Promise.resolve(test);
+        }
+      };
+
+      var config = {
+        path: '/api',
+        endpoints: {
+          'get-all': {
+            path: '/all',
+            method: 'getAll',
+            verbs: ['get'],
+            args: [
+              {srcPath: 'test.a.b.c', src: 'config'}
+            ]
+          }
+        },
+        server: {
+          test: {
+            a: {
+              b: {
+                c: 123
+              }
+            }
+          }
         }
       };
 
@@ -650,11 +688,11 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcKey: 'stringToNumber', type: Number, src: 'body'},
-              {srcKey: 'stringToBooleanTrue', type: Boolean, src: 'body'},
-              {srcKey: 'stringToBooleanFalse', type: Boolean, src: 'body'},
-              {srcKey: 'stringToDate', type: Date, src: 'body'},
-              {srcKey: 'stringToObjectId', type: 'ObjectID', src: 'body'}
+              {srcPath: 'stringToNumber', type: Number, src: 'body'},
+              {srcPath: 'stringToBooleanTrue', type: Boolean, src: 'body'},
+              {srcPath: 'stringToBooleanFalse', type: Boolean, src: 'body'},
+              {srcPath: 'stringToDate', type: Date, src: 'body'},
+              {srcPath: 'stringToObjectId', type: 'ObjectID', src: 'body'}
             ]
           }
         }
@@ -697,7 +735,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcKey: 'name', type: String, src: 'body', required: true},
+              {srcPath: 'name', type: String, src: 'body', required: true},
             ]
           }
         }
@@ -737,7 +775,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcKey: 'name', type: String, src: 'body', notNull: true},
+              {srcPath: 'name', type: String, src: 'body', notNull: true},
             ]
           }
         }
@@ -777,7 +815,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcKey: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
+              {srcPath: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
             ]
           }
         }
@@ -806,7 +844,7 @@ describe('ServerRemoteObject', function(){
             method: 'save',
             verbs: ['post'],
             args: [
-              {srcKey: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
+              {srcPath: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
             ]
           }
         }

@@ -21,8 +21,8 @@ export class ServiceUserAuth extends ServerService
             method: 'create',
             verbs: ['post'],
             args: [
-              {srcKey: 'email', src: 'body-field', required: true},
-              {srcKey: 'password', src: 'body-field', required: true}
+              {srcPath: 'email', src: 'body-field', required: true},
+              {srcPath: 'password', src: 'body-field', required: true}
             ]
           },
           'post-login': {
@@ -30,8 +30,8 @@ export class ServiceUserAuth extends ServerService
             method: 'login',
             verbs: ['post'],
             args: [
-              {srcKey: 'email', src: 'body-field', required: true},
-              {srcKey: 'password', src: 'body-field', required: true}
+              {srcPath: 'email', src: 'body-field', required: true},
+              {srcPath: 'password', src: 'body-field', required: true}
             ]
           },
           'all-logout': {
@@ -39,7 +39,7 @@ export class ServiceUserAuth extends ServerService
             method: 'logout',
             verbs: ['all'],
             args: [
-              {srcKey: 'Authorization', src: 'header-field', required: true}
+              {srcPath: 'Authorization', src: 'header-field', required: true}
             ],
             acl: {
               rules: []
