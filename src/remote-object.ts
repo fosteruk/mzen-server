@@ -201,8 +201,12 @@ export class ServerRemoteObject
     var spec = {};
 
     var parseOne = function(argConfig, key?){
-      const srcPath = argConfig.srcPath ? argConfig.srcPath : null;
-      const name = key ? key : (argConfig.name ? argConfig.name : srcPath);
+      const src = argConfig.src ? argConfig.src : null;
+      const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
+      const srcKey = argConfig.srcKey ? argConfig.srcKey : srcPath;
+      const argName = argConfig.name ? argConfig.name : srcKey;
+      const name = key ? key : argName;
+
       const type = argConfig.type ? argConfig.type : null;
 
       spec[name] = {};
