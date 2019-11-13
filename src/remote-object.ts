@@ -181,14 +181,22 @@ export class ServerRemoteObject
 
     return middleware.sort((a, b) => b.priority - a.priority);
   }
+
+  getArgName(argConfig, key?)
+  {
+    const src = argConfig.src ? argConfig.src : null;
+    const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
+    const srcKey = argConfig.srcKey ? argConfig.srcKey : srcPath;
+    const argName = argConfig.name ? argConfig.name : srcKey;
+    const name = key ? key : argName;
+    return name;
+  }
   
   buildMethodArgArray(methodArgsConfigArray, requestArgs)
   {
     var args = [];
     methodArgsConfigArray.forEach((argConfig) => {
-      const src = argConfig.src ? argConfig.src : null;
-      const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
-      const name = argConfig.name ? argConfig.name : srcPath;
+      const name = this.getArgName(argConfig);
       args.push(requestArgs[name]);
     });
     if (requestArgs.aclContext) args.push(requestArgs.aclContext);
@@ -200,13 +208,8 @@ export class ServerRemoteObject
   {
     var spec = {};
 
-    var parseOne = function(argConfig, key?){
-      const src = argConfig.src ? argConfig.src : null;
-      const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
-      const srcKey = argConfig.srcKey ? argConfig.srcKey : srcPath;
-      const argName = argConfig.name ? argConfig.name : srcKey;
-      const name = key ? key : argName;
-
+    var parseOne = (argConfig, key?) => {
+      const name = this.getArgName(argConfig, key);
       const type = argConfig.type ? argConfig.type : null;
 
       spec[name] = {};
@@ -237,11 +240,7 @@ export class ServerRemoteObject
     var values = {};
     if (Array.isArray(methodArgsConfig)) {
       methodArgsConfig.forEach(argConfig => {
-        // First attempt to retrieve the value for the argument
-        const src = argConfig.src ? argConfig.src : null;
-        const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
-        const srcKey = argConfig.srcKey ? argConfig.srcKey : srcPath;
-        const name = argConfig.name ? argConfig.name : srcKey;
+        const name = this.getArgName(argConfig);
         values[name] = this.parseOneRequestArg(argConfig, req, res);
       });
     } else {
