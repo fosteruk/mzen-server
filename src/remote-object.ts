@@ -251,65 +251,41 @@ export class ServerRemoteObject
   {
     var value = undefined;
     const src = methodArgConfig.src ? methodArgConfig.src : 'query';
+    const srcKey = methodArgConfig.srcKey ? methodArgConfig.srcKey : null;
     const srcPath = methodArgConfig.srcPath ? methodArgConfig.srcPath : null;
 
     req = req ? req : {};
     res = res ? res : {};
 
-    const query = req.query ? req.query : {};
-    const body = req.body ? req.body : {};
-    const params = req.params ? req.params : {};
-    const aclContext = req.aclContext ? req.aclContext : {};
-    const aclConditions = req.aclConditions ? req.aclConditions: {};
-    const config = this.config.server ? this.config.server: {};
+    const srcObjects = {
+      param: req.params ? req.params : {},
+      query: req.query ? req.query : {},
+      body: req.body ? req.body : {},
+      request: req ? req : {},
+      response: res ? res : {},
+      config: this.config.server ? this.config.server : {},
+      aclContext: req.aclContext ? req.aclContext : {},
+      aclConditions: req.aclConditions ? req.aclConditions: {}
+    };
 
-    switch (src) {
-      case 'param':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, params) 
-          : params;
-      break;
-      case 'query':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, query) 
-          : query;
-      break;
-      case 'header':
+    if (src == 'header') {
+      if (srcKey || srcPath) {
         value = srcPath && req.get 
-          ? req.get(srcPath) 
+          ? req.get(srcKey ? srcKey : srcPath) 
           : null;
-      break;
-      case 'body':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, body) 
-          : body;
-      break;
-      case 'request':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, req) 
-          : req;
-      break;
-      case 'response':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, res) 
-          : res;
-      break;
-      case 'config':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, config) 
-          : config;
-      break;
-      case 'aclContext':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, aclContext) 
-          : aclContext;
-      break;
-      case 'aclConditions':
-        value = srcPath 
-          ? ObjectPathAccessor.getPath(srcPath, aclConditions)
-          : aclConditions;
-      break;
-    }
+      }
+    } else {
+      const srcObject = srcObjects[src];
+      if (srcKey || srcPath) {
+        if (srcObject) {
+          value = srcPath 
+            ? ObjectPathAccessor.getPath(srcPath, srcObject) 
+            : srcObject[srcKey]
+        }
+      } else {
+        value = srcObject;
+      }
+    } 
 
     return value;
   }
