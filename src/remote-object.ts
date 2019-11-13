@@ -226,14 +226,10 @@ export class ServerRemoteObject
       aclConditions: req.aclConditions ? req.aclConditions: {}
     };
 
-    if (src == 'header') {
-      value = srcPath && srcObjects.request.get 
-        ? srcObjects.request.get(srcPath) 
-        : null;
-    } else {
-      value = ObjectPathAccessor.getPath(srcPath, srcObjects[src]);
-    } 
-
+    value = src == 'header' 
+      ? srcObjects.request.get(srcPath) 
+      : ObjectPathAccessor.getPath(srcPath, srcObjects[src]);
+      
     return value;
   }
   
