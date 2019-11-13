@@ -68,7 +68,7 @@ export class ServerRemoteObject
       const verbs = endpointConfig.verbs ? endpointConfig.verbs : ['get'];
       const method = endpointConfig.method ? endpointConfig.method : '';
       const path = endpointConfig.path ? endpointConfig.path : method;
-      const methodArgsConfig = endpointConfig.args ? endpointConfig.args : {};
+      const methodDataConfig = endpointConfig.data ? endpointConfig.data : {};
       const priority = endpointConfig.priority != undefined ? endpointConfig.priority : 0;
 
       const response = endpointConfig.response ? endpointConfig.response : {};
@@ -82,11 +82,11 @@ export class ServerRemoteObject
 
       verbs.forEach(verb => {
         let middlewareCallback = async (req, res) => {
-          const requestArgs = this.parseRequestArgs(methodArgsConfig, req, res);
-          const validationSpec = this.parseValidationSpec(methodArgsConfig);
-          const aclContext = {...requestArgs};
+          const requestData = this.parseRequestData(methodDataConfig, req, res);
+          const validationSpec = this.parseValidationSpec(methodDataConfig);
+          const aclContext = {...requestData};
           const argValidateSchema = new Schema(validationSpec);
-          const validateResult = await argValidateSchema.validate(requestArgs);
+          const validateResult = await argValidateSchema.validate(requestData);
 
           if (!validateResult.isValid) {
             res.status(403).json({validationErrors: validateResult.errors});
@@ -102,18 +102,12 @@ export class ServerRemoteObject
               throw new ServerErrorUnauthorized;
             }
 
-            // Append the aclContext and aclConditions to the requestArgs
+            // Append the aclContext and aclConditions to the requestData
             // - these are always appended in this order and are not configurable
-            requestArgs.aclContext = aclContext;
-            requestArgs.aclConditions = typeof isPermitted === 'object' ? isPermitted : {};
+            requestData.aclContext = aclContext;
+            requestData.aclConditions = typeof isPermitted === 'object' ? isPermitted : {};
 
-            // If method args were specified as an array they are passed in to the remote method in order
-            // If method args were specified as an object the remote method gets that object as a single argument
-            const methodArgs = Array.isArray(methodArgsConfig) 
-              ? this.buildMethodArgArray(methodArgsConfig, requestArgs) 
-              : [requestArgs];
-
-            const response = await this.object[method].apply(this.object, methodArgs);
+            const response = await this.object[method].apply(this.object, [requestData]);
 
             const httpConfig = responseSuccess.http ? responseSuccess.http: {};
             const code = httpConfig.code ? httpConfig.code : 200;
@@ -186,77 +180,49 @@ export class ServerRemoteObject
   {
     const src = argConfig.src ? argConfig.src : null;
     const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
-    const srcKey = argConfig.srcKey ? argConfig.srcKey : srcPath;
-    const argName = argConfig.name ? argConfig.name : srcKey;
+    const argName = argConfig.name ? argConfig.name : srcPath;
     const name = key ? key : argName;
     return name;
   }
   
-  buildMethodArgArray(methodArgsConfigArray, requestArgs)
-  {
-    var args = [];
-    methodArgsConfigArray.forEach((argConfig) => {
-      const name = this.getArgName(argConfig);
-      args.push(requestArgs[name]);
-    });
-    if (requestArgs.aclContext) args.push(requestArgs.aclContext);
-    if (requestArgs.aclConditions) args.push(requestArgs.aclConditions);
-    return args;
-  }
-  
-  parseValidationSpec(methodArgsConfig)
+  parseValidationSpec(methodDataConfig)
   {
     var spec = {};
 
     var parseOne = (argConfig, key?) => {
-      const name = this.getArgName(argConfig, key);
       const type = argConfig.type ? argConfig.type : null;
 
-      spec[name] = {};
-      spec[name].$type = type;
-      spec[name].$validate = {};
-      spec[name].$filter = {};
-      if (argConfig.required !== undefined) spec[name].$validate.required = argConfig.required;
-      if (argConfig.notNull !== undefined) spec[name].$validate.notNull = argConfig.notNull;
-      if (argConfig.notEmpty !== undefined) spec[name].$validate.notEmpty = argConfig.notEmpty;
-      if (argConfig.defaultValue !== undefined) spec[name].$filter.defaultValue = argConfig.defaultValue;
+      spec[key] = {};
+      spec[key].$type = type;
+      spec[key].$validate = {};
+      spec[key].$filter = {};
+      if (argConfig.required !== undefined) spec[key].$validate.required = argConfig.required;
+      if (argConfig.notNull !== undefined) spec[key].$validate.notNull = argConfig.notNull;
+      if (argConfig.notEmpty !== undefined) spec[key].$validate.notEmpty = argConfig.notEmpty;
+      if (argConfig.defaultValue !== undefined) spec[key].$filter.defaultValue = argConfig.defaultValue;
     };
 
-    if (Array.isArray(methodArgsConfig)) {
-      methodArgsConfig.forEach((argConfig) => {
-        parseOne(argConfig);
-      });
-    } else {
-      for (var key in methodArgsConfig) {
-        parseOne(methodArgsConfig[key], key);
-      }
+    for (var key in methodDataConfig) {
+      parseOne(methodDataConfig[key], key);
     }
 
     return spec;
   }
   
-  parseRequestArgs(methodArgsConfig, req, res): {[key: string]: any}
+  parseRequestData(methodDataConfig, req, res): {[key: string]: any}
   {
     var values = {};
-    if (Array.isArray(methodArgsConfig)) {
-      methodArgsConfig.forEach(argConfig => {
-        const name = this.getArgName(argConfig);
-        values[name] = this.parseOneRequestArg(argConfig, req, res);
-      });
-    } else {
-      for (var name in methodArgsConfig) {
-        values[name] = this.parseOneRequestArg(methodArgsConfig[name], req, res);
-      }
+    for (var name in methodDataConfig) {
+      values[name] = this.parseOneRequestData(name, methodDataConfig[name], req, res);
     }
     return values;
   }
   
-  parseOneRequestArg(methodArgConfig, req, res)
+  parseOneRequestData(name, methodArgConfig, req, res)
   {
     var value = undefined;
     const src = methodArgConfig.src ? methodArgConfig.src : 'query';
-    const srcKey = methodArgConfig.srcKey ? methodArgConfig.srcKey : null;
-    const srcPath = methodArgConfig.srcPath ? methodArgConfig.srcPath : null;
+    const srcPath = methodArgConfig.srcPath ? methodArgConfig.srcPath : name;
 
     const srcObjects = {
       param: req.params ? req.params : {},
@@ -270,19 +236,15 @@ export class ServerRemoteObject
     };
 
     if (src == 'header') {
-      if (srcKey || srcPath) {
+      if (srcPath) {
         value = srcPath && srcObjects.request.get 
-          ? srcObjects.request.get(srcKey ? srcKey : srcPath) 
+          ? srcObjects.request.get(srcPath) 
           : null;
       }
     } else {
       const srcObject = srcObjects[src];
-      if (srcKey || srcPath) {
-        if (srcObject) {
-          value = srcPath 
-            ? ObjectPathAccessor.getPath(srcPath, srcObject) 
-            : srcObject[srcKey]
-        }
+      if (srcPath) {
+        value = ObjectPathAccessor.getPath(srcPath, srcObject);
       } else {
         value = srcObject;
       }

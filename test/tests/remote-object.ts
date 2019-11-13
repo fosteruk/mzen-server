@@ -97,38 +97,6 @@ describe('ServerRemoteObject', function(){
       should(middlewareConfigs[2].method).eql('a');
       should(middlewareConfigs[3].method).eql('b');
     });
-    it('injects configured body as argument to remote method', async () => {
-      var targetObject = {
-        save: function(requestBody){
-          return Promise.resolve(requestBody);
-        }
-      };
-
-      var config = {
-        path: '/api',
-        endpoints: {
-          'post-save': {
-            path: '/save',
-            method: 'save',
-            verbs: ['post'],
-            args: [
-              {src: 'body'}
-            ]
-          }
-        }
-      };
-
-      var remoteObject = new ServerRemoteObject(targetObject, config);
-      var middlewareConfigs = remoteObject.getMiddlewareConfig();
-
-      should(middlewareConfigs[0].verb).eql('post');
-      should(middlewareConfigs[0].path).eql('/api/save');
-
-      var reqSave = new ExpressMockRequest({body: 'post body'});
-      var resSave = new ExpressMockResponse;
-      await middlewareConfigs[0].callback(reqSave, resSave);
-      should(resSave.mockData).eql('post body');
-    });
     it('injects configured body as field on argument to remote method', async () => {
       var targetObject = {
         save: function(data){
@@ -143,8 +111,8 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: {
-              theBody: {src: 'body'}
+            data: {
+              theBody: {srcPath: 'body', src: 'request'}
             }
           }
         }
@@ -163,7 +131,7 @@ describe('ServerRemoteObject', function(){
     });
     it('injects configured body-field as argument to remote method', async () => {
       var targetObject = {
-        save: function(content){
+        save: function({content}){
           return Promise.resolve(content);
         }
       };
@@ -175,9 +143,9 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: [
-              {srcPath: 'content', src: 'body'}
-            ]
+            data: {
+              content: {srcPath: 'content', src: 'body'}
+            }
           }
         }
       };
@@ -204,7 +172,7 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: {
+            data: {
               thebody: {srcPath: 'content', src: 'body'}
             }
           }
@@ -219,9 +187,9 @@ describe('ServerRemoteObject', function(){
       await middlewareConfigs[0].callback(reqSave, resSave);
       should(resSave.mockData).eql('content value');
     });
-    it('injects configured param as argument to remote method', async () => {
+    it('injects configured param to remote method', async () => {
       var targetObject = {
-        getByPkey: function(pkey){
+        getByPkey: function({pkey}){
           return Promise.resolve(pkey);
         }
       };
@@ -233,9 +201,9 @@ describe('ServerRemoteObject', function(){
             path: '/:pkey',
             method: 'getByPkey',
             verbs: ['get'],
-            args: [
-              {srcPath: 'pkey', src: 'param'}
-            ]
+            data: {
+              pkey: {src: 'param'}
+            }
           }
         }
       };
@@ -248,38 +216,9 @@ describe('ServerRemoteObject', function(){
       await middlewareConfigs[0].callback(reqGetByPkey, resGetByPkey);
       should(resGetByPkey.mockData).eql(123);
     });
-    it('injects configured param as argument to remote method', async () => {
+    it('injects configured query-field to remote method', async () => {
       var targetObject = {
-        getByPkey: function(params){
-          return Promise.resolve(params);
-        }
-      };
-
-      var config = {
-        path: '/api',
-        endpoints: {
-          'get-byPkey': {
-            path: '/:pkey',
-            method: 'getByPkey',
-            verbs: ['get'],
-            args: [
-              {src: 'param'}
-            ]
-          }
-        }
-      };
-
-      var remoteObject = new ServerRemoteObject(targetObject, config);
-      var middlewareConfigs = remoteObject.getMiddlewareConfig();
-
-      var reqGetByPkey = new ExpressMockRequest({params: {pkey: 123}});
-      var resGetByPkey = new ExpressMockResponse;
-      await middlewareConfigs[0].callback(reqGetByPkey, resGetByPkey);
-      should(resGetByPkey.mockData).eql({pkey: 123});
-    });
-    it('injects configured query-field as argument to remote method', async () => {
-      var targetObject = {
-        getAll: function(offset){
+        getAll: function({offset}){
           return Promise.resolve(offset);
         }
       };
@@ -291,9 +230,9 @@ describe('ServerRemoteObject', function(){
             path: '/all',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {srcPath: 'offset', src: 'query'}
-            ]
+            data: {
+              offset: {src: 'query'}
+            }
           }
         }
       };
@@ -306,9 +245,9 @@ describe('ServerRemoteObject', function(){
       await middlewareConfigs[0].callback(reqGetAll, resGetAll);
       should(resGetAll.mockData).eql(50);
     });
-    it('injects configured query as argument to remote method', async () => {
+    it('injects configured query to remote method', async () => {
       var targetObject = {
-        getAll: function(query){
+        getAll: function({query}){
           return Promise.resolve(query);
         }
       };
@@ -320,9 +259,9 @@ describe('ServerRemoteObject', function(){
             path: '/all',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {src: 'query'}
-            ]
+            data: {
+              query: {src: 'request'}
+            }
           }
         }
       };
@@ -335,38 +274,9 @@ describe('ServerRemoteObject', function(){
       await middlewareConfigs[0].callback(reqGetAll, resGetAll);
       should(resGetAll.mockData).eql({offset: 50});
     });
-    it('injects configured request as argument to remote method', async () => {
-      var targetObject = {
-        getAll: function(request){
-          return Promise.resolve(request);
-        }
-      };
-
-      var config = {
-        path: '/api',
-        endpoints: {
-          'get-all': {
-            path: '/all',
-            method: 'getAll',
-            verbs: ['get'],
-            args: [
-              {src: 'request'}
-            ]
-          }
-        }
-      };
-
-      var remoteObject = new ServerRemoteObject(targetObject, config);
-      var middlewareConfigs = remoteObject.getMiddlewareConfig();
-
-      var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
-      var resGetAll = new ExpressMockResponse;
-      await middlewareConfigs[0].callback(reqGetAll, resGetAll);
-      should(resGetAll.mockData).eql(reqGetAll);
-    });
     it('injects configured request field as argument to remote method', async () => {
       var targetObject = {
-        getAll: function(query){
+        getAll: function({query}){
           return Promise.resolve(query);
         }
       };
@@ -378,9 +288,9 @@ describe('ServerRemoteObject', function(){
             path: '/all',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {srcPath: 'query', src: 'request'}
-            ]
+            data: {
+              query: {src: 'request'}
+            }
           }
         }
       };
@@ -393,38 +303,9 @@ describe('ServerRemoteObject', function(){
       await middlewareConfigs[0].callback(reqGetAll, resGetAll);
       should(resGetAll.mockData).eql(reqGetAll.query);
     });
-    it('injects configured response as argument to remote method', async () => {
+    it('injects configured response field to remote method', async () => {
       var targetObject = {
-        getAll: function(response){
-          return Promise.resolve(response);
-        }
-      };
-
-      var config = {
-        path: '/api',
-        endpoints: {
-          'get-all': {
-            path: '/all',
-            method: 'getAll',
-            verbs: ['get'],
-            args: [
-              {src: 'response'}
-            ]
-          }
-        }
-      };
-
-      var remoteObject = new ServerRemoteObject(targetObject, config);
-      var middlewareConfigs = remoteObject.getMiddlewareConfig();
-
-      var reqGetAll = new ExpressMockRequest({query: {offset: 50}});
-      var resGetAll = new ExpressMockResponse;
-      await middlewareConfigs[0].callback(reqGetAll, resGetAll);
-      should(resGetAll.mockData).eql(resGetAll);
-    });
-    it('injects configured response field as argument to remote method', async () => {
-      var targetObject = {
-        getAll: function(test){
+        getAll: function({test}){
           return Promise.resolve(test);
         }
       };
@@ -436,9 +317,9 @@ describe('ServerRemoteObject', function(){
             path: '/all',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {srcPath: 'test', src: 'response'}
-            ]
+            data: {
+              test: {src: 'response'}
+            }
           }
         }
       };
@@ -454,7 +335,7 @@ describe('ServerRemoteObject', function(){
     });
     it('injects configured config field as argument to remote method', async () => {
       var targetObject = {
-        getAll: function(test){
+        getAll: function({test}){
           return Promise.resolve(test);
         }
       };
@@ -466,9 +347,9 @@ describe('ServerRemoteObject', function(){
             path: '/all',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {srcPath: 'test', src: 'config'}
-            ]
+            data: {
+              test: {src: 'config'}
+            }
           }
         },
         server: {
@@ -486,7 +367,7 @@ describe('ServerRemoteObject', function(){
     });
     it('injects configured config field path as argument to remote method', async () => {
       var targetObject = {
-        getAll: function(test){
+        getAll: function({test}){
           return Promise.resolve(test);
         }
       };
@@ -498,9 +379,9 @@ describe('ServerRemoteObject', function(){
             path: '/all',
             method: 'getAll',
             verbs: ['get'],
-            args: [
-              {srcPath: 'test.a.b.c', src: 'config'}
-            ]
+            data: {
+              test: {srcPath: 'test.a.b.c', src: 'config'}
+            }
           }
         },
         server: {
@@ -536,7 +417,8 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post']
-          },
+          }
+          
         }
       };
 
@@ -669,7 +551,13 @@ describe('ServerRemoteObject', function(){
     });
     it('typecasts injected arguments', async () => {
       var targetObject = {
-        save: function(stringToNumber, stringToBooleanTrue, stringToBooleanFalse, stringToDate, stringToObjectId){
+        save: function({
+          stringToNumber, 
+          stringToBooleanTrue, 
+          stringToBooleanFalse, 
+          stringToDate, 
+          stringToObjectId
+        }){
           return Promise.resolve({
             stringToNumber: stringToNumber,
             stringToBooleanTrue: stringToBooleanTrue,
@@ -687,13 +575,13 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: [
-              {srcPath: 'stringToNumber', type: Number, src: 'body'},
-              {srcPath: 'stringToBooleanTrue', type: Boolean, src: 'body'},
-              {srcPath: 'stringToBooleanFalse', type: Boolean, src: 'body'},
-              {srcPath: 'stringToDate', type: Date, src: 'body'},
-              {srcPath: 'stringToObjectId', type: 'ObjectID', src: 'body'}
-            ]
+            data: {
+              stringToNumber: {type: Number, src: 'body'},
+              stringToBooleanTrue: {type: Boolean, src: 'body'},
+              stringToBooleanFalse: {type: Boolean, src: 'body'},
+              stringToDate: {type: Date, src: 'body'},
+              stringToObjectId: {type: 'ObjectID', src: 'body'}
+            }
           }
         }
       };
@@ -722,7 +610,7 @@ describe('ServerRemoteObject', function(){
     });
     it('returns 403 error response code on arg "required" validation error', async () => {
       var targetObject = {
-        save: function(name){
+        save: function({name}){
           return Promise.resolve(name);
         }
       };
@@ -734,9 +622,9 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: [
-              {srcPath: 'name', type: String, src: 'body', required: true},
-            ]
+            data: {
+              name: {type: String, src: 'body', required: true},
+            }
           }
         }
       };
@@ -762,7 +650,7 @@ describe('ServerRemoteObject', function(){
     });
     it('returns 403 error response code on arg "notNull" validation error', async () => {
       var targetObject = {
-        save: function(name){
+        save: function({name}){
           return Promise.resolve(name);
         }
       };
@@ -774,9 +662,9 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: [
-              {srcPath: 'name', type: String, src: 'body', notNull: true},
-            ]
+            data: {
+              name: {type: String, src: 'body', notNull: true},
+            }
           }
         }
       };
@@ -802,7 +690,7 @@ describe('ServerRemoteObject', function(){
     });
     it('injects callback arg with default value for undefined input', async () => {
       var targetObject = {
-        save: function(name){
+        save: function({name}){
           return Promise.resolve(name);
         }
       };
@@ -814,9 +702,9 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: [
-              {srcPath: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
-            ]
+            data: {
+              name: {type: String, src: 'body', defaultValue: 'Kevin'},
+            }
           }
         }
       };
@@ -831,7 +719,7 @@ describe('ServerRemoteObject', function(){
     });
     it('injects callback arg with default value for null input', async () => {
       var targetObject = {
-        save: function(name){
+        save: function({name}){
           return Promise.resolve(name);
         }
       };
@@ -843,9 +731,9 @@ describe('ServerRemoteObject', function(){
             path: '/save',
             method: 'save',
             verbs: ['post'],
-            args: [
-              {srcPath: 'name', type: String, src: 'body', defaultValue: 'Kevin'},
-            ]
+            data: {
+              name: {type: String, src: 'body', defaultValue: 'Kevin'}
+            }
           }
         }
       };
@@ -872,7 +760,7 @@ describe('ServerRemoteObject', function(){
             path: '/',
             method: 'getAll',
             verbs: ['get'],
-            args: [],
+            data: [],
             acl: {
               rules: [
                 {allow: false, role: 'all'}
@@ -910,7 +798,7 @@ describe('ServerRemoteObject', function(){
             path: '/',
             method: 'getAll',
             verbs: ['get'],
-            args: [],
+            data: [],
             acl: {
               rules: [
                 {allow: true, role: 'all'}
@@ -936,7 +824,7 @@ describe('ServerRemoteObject', function(){
     it('injects aclContext into callack method', async () => {
       var targetObject = {
         // aclContext and aclConditions are always appended as arguments - they are no configurable as with requestArgs
-        getAll: function(aclContext){
+        getAll: function({aclContext}){
           return Promise.resolve(aclContext);
         }
       };
@@ -948,7 +836,7 @@ describe('ServerRemoteObject', function(){
             path: '/',
             method: 'getAll',
             verbs: ['get'],
-            args: [],
+            data: [],
             acl: {
               rules: [
                 {allow: true, role: 'all'}
@@ -984,7 +872,7 @@ describe('ServerRemoteObject', function(){
       var targetObject = {
         // aclContext and aclConditions are always appended as arguments - they are no configurable as with requestArgs
         // @ts-ignore - 'aclContext' is declared but its value is never read.
-        getAll: function(aclContext, aclConditions){
+        getAll: function({aclContext, aclConditions}){
           return Promise.resolve(aclConditions);
         }
       };
@@ -996,7 +884,7 @@ describe('ServerRemoteObject', function(){
             path: '/',
             method: 'getAll',
             verbs: ['get'],
-            args: [],
+            data: [],
             acl: {
               rules: [
                 {allow: true, role: 'user'}

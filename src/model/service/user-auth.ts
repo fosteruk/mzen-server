@@ -20,27 +20,27 @@ export class ServiceUserAuth extends ServerService
             path: '/create',
             method: 'create',
             verbs: ['post'],
-            args: [
-              {srcPath: 'email', src: 'body-field', required: true},
-              {srcPath: 'password', src: 'body-field', required: true}
-            ]
+            data: {
+              email: {src: 'body-field', required: true},
+              password: {src: 'body-field', required: true}
+            }
           },
           'post-login': {
             path: '/login',
             method: 'login',
             verbs: ['post'],
-            args: [
-              {srcPath: 'email', src: 'body-field', required: true},
-              {srcPath: 'password', src: 'body-field', required: true}
-            ]
+            data: {
+              email: {src: 'body-field', required: true},
+              password: {src: 'body-field', required: true}
+            }
           },
           'all-logout': {
             path: '/logout',
             method: 'logout',
             verbs: ['all'],
-            args: [
-              {srcPath: 'Authorization', src: 'header-field', required: true}
-            ],
+            data: {
+              Authorization: {src: 'header-field', required: true}
+            },
             acl: {
               rules: []
             },

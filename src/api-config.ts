@@ -1,10 +1,9 @@
 import { Schema } from 'mzen';
 
-export interface ServerApiConfigEndpointArg
+export interface ServerApiConfigEndpointData
 {
   // if name is not specified defaults to srcPath
   name?: string; 
-  srcKey?: string; // Use srcKey or srcPath but not both
   srcPath?: string; 
   src?:
     'param'|'query'|'header'|'body'|'request'
@@ -43,7 +42,7 @@ export interface ServerApiConfigEndpoint
   groups?: Array<'default'|'read'|'write'|string>;
   method?: string;
   verbs?: Array<'get'|'put'|'post'|'delete'|string>;
-  args?: Array<ServerApiConfigEndpointArg> | {[key: string]: ServerApiConfigEndpointArg};
+  data?: {[key: string]: ServerApiConfigEndpointData};
   acl?: ServerApiConfigAcl;
   priority?: number,
   response?: {
