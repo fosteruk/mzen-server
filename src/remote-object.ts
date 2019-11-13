@@ -175,15 +175,6 @@ export class ServerRemoteObject
 
     return middleware.sort((a, b) => b.priority - a.priority);
   }
-
-  getArgName(argConfig, key?)
-  {
-    const src = argConfig.src ? argConfig.src : null;
-    const srcPath = argConfig.srcPath ? argConfig.srcPath : src;
-    const argName = argConfig.name ? argConfig.name : srcPath;
-    const name = key ? key : argName;
-    return name;
-  }
   
   parseValidationSpec(methodDataConfig)
   {
@@ -236,18 +227,11 @@ export class ServerRemoteObject
     };
 
     if (src == 'header') {
-      if (srcPath) {
-        value = srcPath && srcObjects.request.get 
-          ? srcObjects.request.get(srcPath) 
-          : null;
-      }
+      value = srcPath && srcObjects.request.get 
+        ? srcObjects.request.get(srcPath) 
+        : null;
     } else {
-      const srcObject = srcObjects[src];
-      if (srcPath) {
-        value = ObjectPathAccessor.getPath(srcPath, srcObject);
-      } else {
-        value = srcObject;
-      }
+      value = ObjectPathAccessor.getPath(srcPath, srcObjects[src]);
     } 
 
     return value;
