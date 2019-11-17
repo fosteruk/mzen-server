@@ -26,14 +26,14 @@ export class ServerRepo extends Repo
   
   _find(requestQuery, aclConditions)
   {
-    var query = this._parseQuery(clone(requestQuery));
+    var query = this._parseQuery(requestQuery);
     this._applyAclConditions(query.where, aclConditions);
     return this.find(query.where, query.options);
   }
 
   async _findOne(requestQuery, aclConditions)
   {
-    var query = this._parseQuery(clone(requestQuery));
+    var query = this._parseQuery(requestQuery);
     this._applyAclConditions(query.where, aclConditions);
     var object = await this.findOne(query.where, query.options);
     if (!object || Object.keys(object).length == 0) {
@@ -51,7 +51,7 @@ export class ServerRepo extends Repo
 
   async _findByPkey(pkey, requestQuery, aclConditions)
   {
-    var query = this._parseQuery(clone(requestQuery));
+    var query = this._parseQuery(requestQuery);
     query.where[this.config.pkey] = pkey;
     this._applyAclConditions(query, aclConditions);
     var object = await this.findOne(query.where, query.options);
@@ -64,7 +64,7 @@ export class ServerRepo extends Repo
   async _existsByPkey(pkey, requestQuery, aclConditions)
   {
     requestQuery = requestQuery ? requestQuery : {};
-    var query = this._parseQuery(clone(requestQuery));
+    var query = this._parseQuery(requestQuery);
     query.where[this.config.pkey] = pkey;
     this._applyAclConditions(query.where, aclConditions);
     var fields = {};
@@ -111,7 +111,7 @@ export class ServerRepo extends Repo
 
   _deleteOneByPkey(pkey, requestQuery, aclConditions)
   {
-    var query = this._parseQuery(clone(requestQuery));
+    var query = this._parseQuery(requestQuery);
     query.where[this.config.pkey] = pkey;
     this._applyAclConditions(query.where, aclConditions);
     return this.deleteOne(query.where, query.options);
