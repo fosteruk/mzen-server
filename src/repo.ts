@@ -1,6 +1,5 @@
 import { SchemaTypeCaster, Repo, RepoConfig } from 'mzen';
 import ServerApiConfig from './api-config';
-import clone = require('clone');
 
 export class ServerErrorRepoNotFound extends Error {}
 
@@ -44,7 +43,7 @@ export class ServerRepo extends Repo
 
   _count(requestQuery, aclConditions)
   {
-    var query = this._parseQuery(clone(requestQuery), 'count');
+    var query = this._parseQuery(requestQuery, 'count');
     this._applyAclConditions(query.where, aclConditions);
     return this.count(query.where, query.options);
   }
