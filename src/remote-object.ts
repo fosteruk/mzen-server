@@ -215,7 +215,7 @@ export class ServerRemoteObject
     const src = methodArgConfig.src ? methodArgConfig.src : 'query';
     const srcPath = methodArgConfig.srcPath ? methodArgConfig.srcPath : name;
 
-    const srcObjects = {
+    const container = {
       param: req.params ? req.params : {},
       query: req.query ? req.query : {},
       body: req.body ? req.body : {},
@@ -226,10 +226,18 @@ export class ServerRemoteObject
       aclConditions: req.aclConditions ? req.aclConditions: {}
     };
 
-    value = src == 'header' 
-      ? srcObjects.request.get(srcPath) 
-      : ObjectPathAccessor.getPath(srcPath, srcObjects[src]);
-      
+    switch (src) {
+      case 'header':
+        value = container.request.get(srcPath)
+      break;
+      case 'container':
+        value = ObjectPathAccessor.getPath(srcPath, container);
+      break;
+      default:
+        value = ObjectPathAccessor.getPath(srcPath, container[src]);
+      break;
+    }
+
     return value;
   }
   
