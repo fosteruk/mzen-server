@@ -1,7 +1,8 @@
 {
   "name": "mzen-server",
+  "private": true,
   "version": "0.1.182",
-  "description": "mZen Server",
+  "description": "mzen server",
   "main": "lib/index",
   "scripts": {
     "prepare": "npm run build",
@@ -14,10 +15,10 @@
   },
   "author": "Kevin Foster <kevin.foster.uk@gmail.com>",
   "license": "BSD-3-Clause",
-  "homepage": "https://github.com/kevin-foster/mZen-Server",
+  "homepage": "https://github.com/kevin-foster/mzen-server",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kevin-foster/mZen-Server.git"
+    "url": "https://github.com/kevin-foster/mzen-server.git"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
