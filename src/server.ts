@@ -8,7 +8,7 @@ import ServerService from './service';
 import ServerAcl from './acl';
 import ServerAclRoleAssessor from './acl/role-assessor';
 import repos from './model/repo/';
-import services from './model/repo/';
+import services from './model/service/';
 import roleAssessors from './acl/role-assessor/';
 import Http = require('http');
 import express = require('express');
