@@ -1,5 +1,4 @@
 import { 
-  ResourceLoader, 
   ModelManager, 
   ModelManagerConfig 
 } from 'mzen';
@@ -7,6 +6,10 @@ import ServerRemoteObject from './remote-object';
 import ServerRepo from './repo';
 import ServerService from './service';
 import ServerAcl from './acl';
+import ServerAclRoleAssessor from './acl/role-assessor';
+import repos from './model/repo/';
+import services from './model/repo/';
+import roleAssessors from './acl/role-assessor/';
 import Http = require('http');
 import express = require('express');
 import bodyParser = require('body-parser');
@@ -17,8 +20,6 @@ export interface ServerConfig
   path?: string;
   port?: number;
   appDir?: string;
-  initDirName?: string;
-  aclDirName?: string;
   model?: ModelManagerConfig; 
   [key: string]: any; // Any custom config options
 }
@@ -32,6 +33,9 @@ export class Server
   router: express.Router;
   aclRoleAssessor: {[key: string]: any};
   logger: any;
+  initialisers: {
+    [key: string]: any[]
+  };
   initialised: boolean;
   
   constructor(options?: ServerConfig, modelManager?: ModelManager)
@@ -41,8 +45,6 @@ export class Server
     this.config.port = this.config.port ? this.config.port : 3838;
     // Default appDir directory is the same directory as the executed script
     this.config.appDir = this.config.appDir ? path.resolve(this.config.appDir) : '';
-    this.config.initDirName = this.config.initDirName ? this.config.initDirName : '/init';
-    this.config.aclDirName = this.config.aclDirName ? this.config.aclDirName : '/acl';
     
     this.modelManager = modelManager 
       ? modelManager 
@@ -53,6 +55,7 @@ export class Server
     this.router = express.Router();
     this.aclRoleAssessor = {};
     this.logger = console;
+    this.initialisers = {};
     this.initialised = false;
   }
   
@@ -62,36 +65,34 @@ export class Server
     this.modelManager.setLogger(logger);
     return this;
   }
-  
+
   async init()
   {
     if (!this.initialised) {
-      // Add app model directory based on value of appDir 
-      // if no model directories have been configured
-      if (this.modelManager.config.modelDirs.length == 0) {
-        this.modelManager.config.modelDirs.push(this.config.appDir + '/model');
-      }
+      await this.runInitialisers();
+
       // Add default model directory 
       // - this is model functionality provided by the mzen-server package
-      this.modelManager.config.modelDirs.unshift(__dirname + '/model');
+      this.modelManager.addRepos(repos);
+      this.modelManager.addServices(services);
+      this.addRoleAssessors(roleAssessors);
 
-      await this.bootInitScripts('00-init');
+      await this.runInitialisers('00-init');
 
       await this.modelManager.init();
-      await this.bootInitScripts('01-model-initialised');
+      await this.runInitialisers('01-model-initialised');
 
-      await this.loadResources();
-      await this.bootInitScripts('02-resources-loaded');
+      await this.runInitialisers('02-resources-loaded');
 
       await this.registerServiceEndpoints();
       await this.registerRepoApiEndpoints();
-      await this.bootInitScripts('03-endpoints-registered');
+      await this.runInitialisers('03-endpoints-registered');
 
       this.app.use(bodyParser.json());
       this.app.use(bodyParser.text());
       this.app.use(bodyParser.urlencoded({extended: true}));
       this.app.use(this.config.path, this.router);
-      await this.bootInitScripts('04-router-mounted');
+      await this.runInitialisers('04-router-mounted');
 
       this.app.use((err, req, res, next) => {
         this.logger.error({err, req, res});
@@ -99,53 +100,41 @@ export class Server
         next();
       });
 
-      await this.bootInitScripts('99-final');
+      await this.runInitialisers('99-final');
 
       this.initialised = true;
     }
   }
-  
-  async bootInitScripts(stage?: string)
+
+  async runInitialisers(stage?:string)
   {
-    const loader = new ResourceLoader({
-      dirPaths: [this.config.appDir],
-      subdir: 
-        stage ? this.config.initDirName + '/' + stage 
-              : this.config.initDirName
-    });
-
-    var filePaths = loader.getResourcePaths();
-    
-    // Sort by filename
-    // - Order of execution is important
-    // - Files should be named to give the correct order
-    filePaths.sort((a, b) => (path.basename(a) > path.basename(b) ? 1 : 0));
-
-    filePaths.forEach(async filePath => {
-      let initFunction = ResourceLoader.loadModule(filePath);
-      if (typeof initFunction == 'function') {
-        let promise = initFunction(this);
-        if (promise && promise.constructor && promise.constructor instanceof Promise) {
-          await promise;
-        }
-      }
-    });
-  }
-  
-  async loadResources()
-  {
-    const loader = new ResourceLoader({
-      dirPaths: [__dirname, this.config.appDir],
-      subdir: this.config.aclDirName + '/role-assessor'
-    });
-
-    const assessors = loader.getResources();
-    for (let assessorName in assessors) {
-      let roleAssessor = new assessors[assessorName]();
-      this.aclRoleAssessor[roleAssessor.role] = roleAssessor;
+    stage = stage ? stage : 'default';
+    if (this.initialisers[stage]) {
+      this.initialisers[stage].forEach(async initFunction => {
+        await Promise.resolve(initFunction(this));
+      });
     }
+  }
 
-    return this;
+  addInitialiser(initialiser, stage?:string)
+  {
+    stage = stage ? stage : 'default';
+    if (this.initialisers[stage] === undefined) {
+      this.initialisers[stage] = [];
+    }
+    this.initialisers[stage].push(initialiser);
+  }
+
+  addRoleAssessor(roleAssessor:ServerAclRoleAssessor)
+  {
+    this.aclRoleAssessor[roleAssessor.role] = roleAssessor;
+  }
+
+  addRoleAssessors(roleAssessors:ServerAclRoleAssessor[])
+  {
+    roleAssessors.forEach(roleAssessor => {
+      this.addRoleAssessor(roleAssessor);
+    });
   }
   
   registerServiceEndpoints()

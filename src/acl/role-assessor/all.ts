@@ -1,6 +1,6 @@
 import ServerAclRoleAssessor from '../role-assessor';
 
-class ServerAclRoleAssessorAll extends ServerAclRoleAssessor
+export class ServerAclRoleAssessorAll extends ServerAclRoleAssessor
 {
   constructor()
   {
