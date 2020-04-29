@@ -1,4 +1,8 @@
-import { ResourceLoader, ModelManager, ModelManagerConfig } from 'mzen';
+import { 
+  ResourceLoader, 
+  ModelManager, 
+  ModelManagerConfig 
+} from 'mzen';
 import ServerRemoteObject from './remote-object';
 import ServerRepo from './repo';
 import ServerService from './service';
@@ -40,7 +44,9 @@ export class Server
     this.config.initDirName = this.config.initDirName ? this.config.initDirName : '/init';
     this.config.aclDirName = this.config.aclDirName ? this.config.aclDirName : '/acl';
     
-    this.modelManager = modelManager ? modelManager : new ModelManager(this.config.model ? this.config.model : undefined);
+    this.modelManager = modelManager 
+      ? modelManager 
+      : new ModelManager(this.config.model ? this.config.model : undefined);
 
     this.app = express();
     this.server = null;
@@ -60,11 +66,13 @@ export class Server
   async init()
   {
     if (!this.initialised) {
-      // Add app model directory based on value of appDir if no model directories have been configured
+      // Add app model directory based on value of appDir 
+      // if no model directories have been configured
       if (this.modelManager.config.modelDirs.length == 0) {
         this.modelManager.config.modelDirs.push(this.config.appDir + '/model');
       }
-      // Add default model directory - this is model functionality provided by the mzen-server package
+      // Add default model directory 
+      // - this is model functionality provided by the mzen-server package
       this.modelManager.config.modelDirs.unshift(__dirname + '/model');
 
       await this.bootInitScripts('00-init');
@@ -79,9 +87,9 @@ export class Server
       await this.registerRepoApiEndpoints();
       await this.bootInitScripts('03-endpoints-registered');
 
-      this.app.use(bodyParser.json()); // for parsing application/json
+      this.app.use(bodyParser.json());
       this.app.use(bodyParser.text());
-      this.app.use(bodyParser.urlencoded({extended: true})); // for parsing application/x-www-form-urlencoded
+      this.app.use(bodyParser.urlencoded({extended: true}));
       this.app.use(this.config.path, this.router);
       await this.bootInitScripts('04-router-mounted');
 
@@ -101,13 +109,16 @@ export class Server
   {
     const loader = new ResourceLoader({
       dirPaths: [this.config.appDir],
-      subdir: stage ? this.config.initDirName + '/' + stage : this.config.initDirName
+      subdir: 
+        stage ? this.config.initDirName + '/' + stage 
+              : this.config.initDirName
     });
 
     var filePaths = loader.getResourcePaths();
     
     // Sort by filename
-    // - the order of execution is important so files should be named to give the correct order
+    // - Order of execution is important
+    // - Files should be named to give the correct order
     filePaths.sort((a, b) => (path.basename(a) > path.basename(b) ? 1 : 0));
 
     filePaths.forEach(async filePath => {
@@ -144,7 +155,9 @@ export class Server
     {
       var service = services[serviceName] as ServerService;
       var apiConfig = service.config.api ? service.config.api : {};
-      var path = apiConfig.path != null ? apiConfig.path : '/service/' + camelToKebab(serviceName);
+      var path = apiConfig.path != null 
+        ? apiConfig.path 
+        : '/service/' + camelToKebab(serviceName);
       var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
       var aclConfig = apiConfig.acl ? apiConfig.acl : {};
       var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
@@ -159,10 +172,14 @@ export class Server
         var groups = endpoints[endpointName].groups;
         if (Array.isArray(groups)) {
           groups.forEach(function(group){
-            if (endpoints[endpointName] && endpointDisableGroup[group] == true) delete endpoints[endpointName]
+            if (endpoints[endpointName] && endpointDisableGroup[group] == true) {
+              delete endpoints[endpointName]
+            }
           });
         }
-        if (endpoints[endpointName] && endpointsDisable[endpointName] == true) delete endpoints[endpointName];
+        if (endpoints[endpointName] && endpointsDisable[endpointName] == true) {
+          delete endpoints[endpointName];
+        }
       }
 
        // This service has no end points - nothing more to do
@@ -178,11 +195,14 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      var remoteObject = new ServerRemoteObject(services[serviceName], {
-        path, 
-        endpoints,
-        server: this.config
-      });
+      var remoteObject = new ServerRemoteObject(
+        services[serviceName], 
+        {
+          path, 
+          endpoints,
+          server: this.config
+        }
+      );
       remoteObject.setLogger(this.logger);
       remoteObject.setAcl(acl);
       remoteObject.initRouter(this.router);
@@ -196,7 +216,9 @@ export class Server
     {
       var repo = repos[repoName] as ServerRepo;
       var apiConfig = repo.config.api ? repo.config.api: {};
-      var path = apiConfig.path != null ? apiConfig.path : '/repo/' + camelToKebab(repoName);
+      var path = apiConfig.path != null 
+        ? apiConfig.path 
+        : '/repo/' + camelToKebab(repoName);
       var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
       var aclConfig = apiConfig.acl ? apiConfig.acl : {};
       var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
@@ -211,13 +233,18 @@ export class Server
         var groups = endpoints[endpointName].groups;
         if (Array.isArray(groups)) {
           groups.forEach(function(group){
-            if (endpoints[endpointName] && endpointDisableGroup[group] == true) delete endpoints[endpointName]
+            if (endpoints[endpointName] && endpointDisableGroup[group] == true) {
+              delete endpoints[endpointName]
+            }
           });
         }
-        if (endpoints[endpointName] && endpointsDisable[endpointName] == true) delete endpoints[endpointName];
+        if (endpoints[endpointName] && endpointsDisable[endpointName] == true) {
+          delete endpoints[endpointName];
+        }
       }
 
-      if (Object.keys(endpoints).length == 0) continue; // This repo has no end points - nothing more to do
+      // This repo has no end points - nothing more to do
+      if (Object.keys(endpoints).length == 0) continue; 
       
       var acl = new ServerAcl({
         rules: aclConfig.rules,
@@ -229,11 +256,13 @@ export class Server
         acl.addRoleAssessor(this.aclRoleAssessor[role]);
       }
 
-      var remoteObject = new ServerRemoteObject(repos[repoName], {
-        path, 
-        endpoints,
-        server: this.config
-      });
+      var remoteObject = new ServerRemoteObject(
+        repos[repoName], {
+          path, 
+          endpoints,
+          server: this.config
+        }
+      );
       remoteObject.setLogger(this.logger);
       remoteObject.setAcl(acl);
       remoteObject.initRouter(this.router);

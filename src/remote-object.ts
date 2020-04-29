@@ -5,8 +5,16 @@ import {
   SchemaValidationResult, 
   ObjectPathAccessor 
 } from 'mzen';
-import { ServerError, ServerErrorUnauthorized, serverErrorApiEndpointResponseConfig } from './error';
-import { ServerApiConfigAcl, ServerApiConfigEndpoint, ServerApiConfigEndpointResponse } from './api-config';
+import { 
+  ServerError, 
+  ServerErrorUnauthorized, 
+  serverErrorApiEndpointResponseConfig 
+} from './error';
+import { 
+  ServerApiConfigAcl, 
+  ServerApiConfigEndpoint, 
+  ServerApiConfigEndpointResponse 
+} from './api-config';
 
 export interface ServerRemoteObjectConfig
 {
@@ -28,11 +36,16 @@ export class ServerRemoteObject
   constructor(object, config?)
   {
     this.config = config ? config : {};
-    this.config.path = this.config.path ? this.config.path : '';
-    this.config.endpoints = this.config.endpoints ? this.config.endpoints : {};
-    this.config.acl = this.config.acl ? this.config.acl : {};
-    this.config.acl.rules = this.config.acl.rules ? this.config.acl.rules : [];
-    this.config.server = this.config.server ? this.config.server : {};
+    this.config.path = this.config.path 
+      ? this.config.path : '';
+    this.config.endpoints = this.config.endpoints 
+      ? this.config.endpoints : {};
+    this.config.acl = this.config.acl 
+      ? this.config.acl : {};
+    this.config.acl.rules = this.config.acl.rules 
+      ? this.config.acl.rules : [];
+    this.config.server = this.config.server 
+      ? this.config.server : {};
 
     this.object = object;
     this.acl = new ServerAcl;
@@ -49,7 +62,10 @@ export class ServerRemoteObject
   {
     const middlewareConfigs = this.getMiddlewareConfig();
     middlewareConfigs.forEach(middlewareConfig => {
-      router[middlewareConfig.verb](middlewareConfig.path, middlewareConfig.callback);
+      router[middlewareConfig.verb](
+        middlewareConfig.path, 
+        middlewareConfig.callback
+      );
     });
   }
   
@@ -75,7 +91,9 @@ export class ServerRemoteObject
       const responseSuccess = response.success ? response.success: {};
       const responseErrorConfig = response.error ? response.error: {};
       // Append configured error handlers to default error handlers
-      var errorEndpointResponses = {...serverErrorApiEndpointResponseConfig} as ServerApiConfigEndpointResponse;
+      var errorEndpointResponses = {
+        ...serverErrorApiEndpointResponseConfig
+      } as ServerApiConfigEndpointResponse;
       for (var errorName in responseErrorConfig) {
         errorEndpointResponses[errorName] = responseErrorConfig[errorName];
       }
@@ -93,7 +111,12 @@ export class ServerRemoteObject
             return;
           }
 
-          if (this.object[method] === undefined) throw new Error('Method "' + method + '" is not defined in endpoint "' + endpointName + '"');
+          if (this.object[method] === undefined) {
+            throw new Error(
+              'Method "' + method 
+              + '" is not defined in endpoint "' + endpointName + '"'
+            );
+          }
 
           try {
             await this.acl.populateContext(req, aclContext);
