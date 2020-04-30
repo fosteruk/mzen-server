@@ -30,6 +30,9 @@
     "ts-node": "^8.0.3",
     "typescript": "^3.3.3333"
   },
+  "peerDependencies": {
+    "mzen": "github:fosteruk/mzen#semver:^0.1"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.15.2",
