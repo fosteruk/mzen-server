@@ -125,6 +125,13 @@ export class Server
     this.initialisers[stage].push(initialiser);
   }
 
+  addInitialisers(initialisers, stage?:string)
+  {
+    initialisers.forEach(initialiser => {
+      this.addInitialiser(initialiser, stage);
+    });
+  }
+
   addRoleAssessor(roleAssessor:ServerAclRoleAssessor)
   {
     this.aclRoleAssessor[roleAssessor.role] = roleAssessor;
