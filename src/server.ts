@@ -7,9 +7,6 @@ import ServerRepo from './repo';
 import ServerService from './service';
 import ServerAcl from './acl';
 import ServerAclRoleAssessor from './acl/role-assessor';
-import repos from './model/repo/';
-import services from './model/service/';
-import roleAssessors from './acl/role-assessor/';
 import Http = require('http');
 import express = require('express');
 import bodyParser = require('body-parser');
@@ -70,13 +67,6 @@ export class Server
   {
     if (!this.initialised) {
       await this.runInitialisers();
-
-      // Add default model directory 
-      // - this is model functionality provided by the mzen-server package
-      this.modelManager.addRepos(repos);
-      this.modelManager.addServices(services);
-      this.addRoleAssessors(roleAssessors);
-
       await this.runInitialisers('00-init');
 
       await this.modelManager.init();
