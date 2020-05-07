@@ -35,7 +35,6 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.15.2",
     "express": "^4.16.0",
     "merge": "^1.2.1",
     "mzen": "github:fosteruk/mzen#master"

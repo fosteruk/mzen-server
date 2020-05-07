@@ -9,7 +9,6 @@ import ServerAcl from './acl';
 import ServerAclRoleAssessor from './acl/role-assessor';
 import Http = require('http');
 import express = require('express');
-import bodyParser = require('body-parser');
 import path = require('path');
 
 export interface ServerConfig
@@ -78,9 +77,6 @@ export class Server
       await this.registerRepoApiEndpoints();
       await this.runInitialisers('03-endpoints-registered');
 
-      this.app.use(bodyParser.json({limit: '1mb'}));
-      this.app.use(bodyParser.text());
-      this.app.use(bodyParser.urlencoded({limit: '1mb', extended: true}));
       this.app.use(this.config.path, this.router);
       await this.runInitialisers('04-router-mounted');
 
