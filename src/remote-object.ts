@@ -15,6 +15,8 @@ import {
   ServerApiConfigEndpoint, 
   ServerApiConfigEndpointResponse 
 } from './api-config';
+// @ts-ignore
+import bodyParser from 'body-parser';
 
 export interface ServerRemoteObjectConfig
 {
@@ -57,15 +59,43 @@ export class ServerRemoteObject
     this.logger = logger;
     return this;
   }
+
+  getBodyParserMiddleware(bodyParserConfig)
+  {
+    const {
+      json, 
+      urlencoded,
+      text,
+      raw
+    } = bodyParserConfig;
+    let middlware = [];
+    if (json && json.enable) {
+      middlware.push(bodyParser.json(json));
+    }
+    if (urlencoded && urlencoded.enable) {
+      middlware.push(bodyParser.urlencoded(urlencoded));
+    }
+    if (text && text.enable) {
+      middlware.push(bodyParser.text(text));
+    }
+    if (raw && raw.enable) {
+      middlware.push(bodyParser.text(raw));
+    }
+    return middlware;
+  }
   
   initRouter(router)
   {
     const middlewareConfigs = this.getMiddlewareConfig();
     middlewareConfigs.forEach(middlewareConfig => {
-      router[middlewareConfig.verb](
-        middlewareConfig.path, 
-        middlewareConfig.callback
+      const bodyParserMiddleware = this.getBodyParserMiddleware(
+        middlewareConfig.bodyParserConfig
       );
+      router[middlewareConfig.verb].apply(null,[
+        middlewareConfig.path,
+        ...bodyParserMiddleware,
+        middlewareConfig.callback
+      ]);;
     });
   }
   
@@ -84,7 +114,8 @@ export class ServerRemoteObject
       const verbs = endpointConfig.verbs ? endpointConfig.verbs : ['get'];
       const method = endpointConfig.method ? endpointConfig.method : '';
       const path = endpointConfig.path ? endpointConfig.path : method;
-      const methodDataConfig = endpointConfig.data ? endpointConfig.data : {};
+      const bodyParserConfig = this.bodyParserConfigNormalise(endpointConfig.bodyParser);
+      const requestDataConfig = endpointConfig.data ? endpointConfig.data : {};
       const priority = endpointConfig.priority != undefined ? endpointConfig.priority : 0;
 
       const response = endpointConfig.response ? endpointConfig.response : {};
@@ -100,8 +131,8 @@ export class ServerRemoteObject
 
       verbs.forEach(verb => {
         let middlewareCallback = async (req, res) => {
-          const requestData = this.parseRequestData(methodDataConfig, req, res);
-          const validationSpec = this.parseValidationSpec(methodDataConfig);
+          const requestData = this.parseRequestData(requestDataConfig, req, res);
+          const validationSpec = this.parseValidationSpec(requestDataConfig);
           const aclContext = {...requestData};
           const argValidateSchema = new Schema(validationSpec);
           const validateResult = await argValidateSchema.validate(requestData);
@@ -191,7 +222,8 @@ export class ServerRemoteObject
           verb: verb,
           path: this.config.path + path,
           callback: middlewareCallback,
-          priority: priority
+          priority: priority,
+          bodyParserConfig
         });
       });
     }
@@ -199,7 +231,7 @@ export class ServerRemoteObject
     return middleware.sort((a, b) => b.priority - a.priority);
   }
   
-  parseValidationSpec(methodDataConfig)
+  parseValidationSpec(requestDataConfig)
   {
     var spec = {};
 
@@ -216,18 +248,18 @@ export class ServerRemoteObject
       if (argConfig.defaultValue !== undefined) spec[key].$filter.defaultValue = argConfig.defaultValue;
     };
 
-    for (var key in methodDataConfig) {
-      parseOne(methodDataConfig[key], key);
+    for (var key in requestDataConfig) {
+      parseOne(requestDataConfig[key], key);
     }
 
     return spec;
   }
   
-  parseRequestData(methodDataConfig, req, res): {[key: string]: any}
+  parseRequestData(requestDataConfig, req, res): {[key: string]: any}
   {
     var values = {};
-    for (var name in methodDataConfig) {
-      values[name] = this.parseOneRequestData(name, methodDataConfig[name], req, res);
+    for (var name in requestDataConfig) {
+      values[name] = this.parseOneRequestData(name, requestDataConfig[name], req, res);
     }
     return values;
   }
@@ -262,6 +294,57 @@ export class ServerRemoteObject
     }
 
     return value;
+  }
+
+  bodyParserConfigNormalise(config:any)
+  {
+    config = config ? config : {};
+    const {
+      json, urlencoded, text, raw
+    } = config;
+    const jsonDefault = {enable:true, limit: '100kb'};
+    const urlencodedDefault = {enable:true, limit: '100kb', extended: true};
+    const textDefault = {enable:true, limit: '100kb'};
+    const rawDefault = {enable:true, limit: '100kb'};
+    return {
+      json: (
+        json 
+        ? {
+          enable: json.enable != undefined ? !!json.enable : jsonDefault.enable, 
+          limit: json.limit != undefined ? json.limit : jsonDefault.limit, 
+          type: json.type != undefined ? json.type : undefined 
+        }
+        : jsonDefault
+      ),
+      urlencoded: (
+        urlencoded 
+        ? {
+          enable: urlencoded.enable != undefined ? !!urlencoded.enable : urlencodedDefault.enable, 
+          limit: urlencoded.limit != undefined ? urlencoded.limit : urlencodedDefault.limit, 
+          extended: urlencoded.extended != undefined ? urlencoded.extended : urlencodedDefault.extended, 
+          type: urlencoded.type != undefined ? urlencoded.type : undefined 
+        }
+        : urlencodedDefault
+      ),
+      text: (
+        text
+        ? {
+          enable: text.enable != undefined ? !!text.enable : textDefault.enable, 
+          limit: text.limit != undefined ? text.limit : textDefault.limit, 
+          type: text.type != undefined ? text.type : undefined 
+        }
+        : textDefault
+      ),
+      raw: (
+        raw 
+        ? {
+          enable: raw.enable != undefined ? !!raw.enable : rawDefault.enable, 
+          limit: raw.limit != undefined ? raw.limit : rawDefault.limit, 
+          type: raw.type != undefined ? raw.type : undefined 
+        }
+        : textDefault
+      ),
+    };
   }
   
   requestMin(req)

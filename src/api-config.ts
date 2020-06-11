@@ -42,6 +42,12 @@ export interface ServerApiConfigEndpoint
   groups?: Array<'default'|'read'|'write'|string>;
   method?: string;
   verbs?: Array<'get'|'put'|'post'|'delete'|string>;
+  bodyParser?: {
+    json?: {enable?:boolean, limit?: string, type?: string},
+    urlencoded?: {enable?:boolean, limit?: string, extended?: boolean, type?: string},
+    text?: {enable?:boolean, limit?: string, type?: string},
+    raw?: {enable?:boolean, limit?: string, type?: string},
+  };
   data?: {[key: string]: ServerApiConfigEndpointData};
   acl?: ServerApiConfigAcl;
   priority?: number,
