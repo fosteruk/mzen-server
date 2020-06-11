@@ -302,9 +302,9 @@ export class ServerRemoteObject
       json, urlencoded, text, raw
     } = config;
     const jsonDefault = {enable:true, limit: '100kb'};
-    const urlencodedDefault = {enable:true, limit: '100kb', extended: true};
-    const textDefault = {enable:true, limit: '100kb'};
-    const rawDefault = {enable:true, limit: '100kb'};
+    const urlencodedDefault = {enable:false, limit: '100kb', extended: true};
+    const textDefault = {enable:false, limit: '100kb'};
+    const rawDefault = {enable:false, limit: '100kb'};
     return {
       json: (
         json 
