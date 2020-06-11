@@ -15,8 +15,7 @@ import {
   ServerApiConfigEndpoint, 
   ServerApiConfigEndpointResponse 
 } from './api-config';
-// @ts-ignore
-import bodyParser from 'body-parser';
+const bodyParser = require('body-parser');
 
 export interface ServerRemoteObjectConfig
 {
