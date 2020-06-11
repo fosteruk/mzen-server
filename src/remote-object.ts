@@ -90,7 +90,7 @@ export class ServerRemoteObject
       const bodyParserMiddleware = this.getBodyParserMiddleware(
         middlewareConfig.bodyParserConfig
       );
-      router[middlewareConfig.verb].apply(null,[
+      router[middlewareConfig.verb].apply(router,[
         middlewareConfig.path,
         ...bodyParserMiddleware,
         middlewareConfig.callback
