@@ -1,7 +1,7 @@
 {
   "name": "mzen-server",
   "private": true,
-  "version": "0.1.194",
+  "version": "0.1.195",
   "description": "mzen server",
   "main": "lib/index",
   "scripts": {
