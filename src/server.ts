@@ -2,9 +2,12 @@ import {
   ModelManager, 
   ModelManagerConfig 
 } from 'mzen';
-import ServerRemoteObject from './remote-object';
-import ServerRepo from './repo';
-import ServerService from './service';
+import { 
+  ServerRemoteObject
+} from './remote-object';
+import { 
+  ServerApiConfig
+} from './api-config';
 import ServerAcl from './acl';
 import ServerAclRoleAssessor from './acl/role-assessor';
 import Http = require('http');
@@ -24,6 +27,7 @@ export class Server
 {
   modelManager: ModelManager;
   config: ServerConfig;
+  apiConfigs: Array<ServerApiConfig>;
   app: express.Application;
   server: Http.Server;
   router: express.Router;
@@ -73,8 +77,7 @@ export class Server
 
       await this.runInitialisers('02-resources-loaded');
 
-      await this.registerServiceEndpoints();
-      await this.registerRepoApiEndpoints();
+      await this.registerEndpoints();
       await this.runInitialisers('03-endpoints-registered');
 
       this.app.use(this.config.path, this.router);
@@ -129,126 +132,101 @@ export class Server
       this.addRoleAssessor(roleAssessor);
     });
   }
-  
-  registerServiceEndpoints()
+
+  addApiConfig(config:ServerApiConfig)
   {
-    const services = this.modelManager.services;
-    for (let serviceName in services)
-    {
-      var service = services[serviceName] as ServerService;
-      var apiConfig = service.config.api ? service.config.api : {};
-      var path = apiConfig.path != null 
-        ? apiConfig.path 
-        : '/service/' + camelToKebab(serviceName);
-      var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
-      var aclConfig = apiConfig.acl ? apiConfig.acl : {};
-      var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
-      var endpointsDisable = endpoint.disable ? endpoint.disable : {};
-      var endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
-      var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
+    this.apiConfigs.push(config);
+  }
 
-      if (!enable) continue;
-      
-      // Remove any endpoints that have been disabled
-      for (var endpointName in endpoints) {
-        var groups = endpoints[endpointName].groups;
-        if (Array.isArray(groups)) {
-          groups.forEach(function(group){
-            if (endpoints[endpointName] && endpointDisableGroup[group] == true) {
-              delete endpoints[endpointName]
-            }
-          });
-        }
-        if (endpoints[endpointName] && endpointsDisable[endpointName] == true) {
-          delete endpoints[endpointName];
-        }
+  addApiConfigs(configs:Array<ServerApiConfig>)
+  {
+    this.apiConfigs = this.apiConfigs.concat(configs);
+  }
+
+  registerEndpoints() 
+  {
+    if (this.apiConfigs) {
+      for (var apiConfig of this.apiConfigs) {
+        this.registerEndpointsConfig(apiConfig);
       }
-
-       // This service has no end points - nothing more to do
-      if (Object.keys(endpoints).length == 0) continue;
-
-      var acl = new ServerAcl({
-        rules: aclConfig.rules,
-        endpoints
-      });
-      acl.loadDefaultRoleAssessors();
-      acl.setRepos(this.modelManager.repos);
-      for (var role in this.aclRoleAssessor) {
-        acl.addRoleAssessor(this.aclRoleAssessor[role]);
-      }
-
-      var remoteObject = new ServerRemoteObject(
-        services[serviceName], 
-        {
-          path, 
-          endpoints,
-          server: this.config
-        }
-      );
-      remoteObject.setLogger(this.logger);
-      remoteObject.setAcl(acl);
-      remoteObject.initRouter(this.router);
     }
   }
-  
-  registerRepoApiEndpoints()
+
+  registerEndpointsConfig(config:ServerApiConfig)
   {
-    const repos = this.modelManager.repos;
-    for (var repoName in repos)
-    {
-      var repo = repos[repoName] as ServerRepo;
-      var apiConfig = repo.config.api ? repo.config.api: {};
-      var path = apiConfig.path != null 
-        ? apiConfig.path 
-        : '/repo/' + camelToKebab(repoName);
-      var enable = (apiConfig.enable !== undefined) ? apiConfig.enable : true;
-      var aclConfig = apiConfig.acl ? apiConfig.acl : {};
-      var endpoint = apiConfig.endpoint ? apiConfig.endpoint : {};
-      var endpointsDisable = endpoint.disable ? endpoint.disable : {};
-      var endpointDisableGroup = endpoint.disableGroup ? endpoint.disableGroup : {};
-      var endpoints = apiConfig.endpoints ? apiConfig.endpoints : {};
-
-      if (!enable) continue;
-
-      // Remove any endpoints that have been disabled
-      for (var endpointName in endpoints) {
-        var groups = endpoints[endpointName].groups;
-        if (Array.isArray(groups)) {
-          groups.forEach(function(group){
-            if (endpoints[endpointName] && endpointDisableGroup[group] == true) {
-              delete endpoints[endpointName]
-            }
-          });
-        }
-        if (endpoints[endpointName] && endpointsDisable[endpointName] == true) {
-          delete endpoints[endpointName];
-        }
-      }
-
-      // This repo has no end points - nothing more to do
-      if (Object.keys(endpoints).length == 0) continue; 
-      
-      var acl = new ServerAcl({
-        rules: aclConfig.rules,
-        endpoints
-      });
-      acl.loadDefaultRoleAssessors();
-      acl.setRepos(this.modelManager.repos);
-      for (var role in this.aclRoleAssessor) {
-        acl.addRoleAssessor(this.aclRoleAssessor[role]);
-      }
-
-      var remoteObject = new ServerRemoteObject(
-        repos[repoName], {
-          path, 
-          endpoints,
-          server: this.config
-        }
-      );
-      remoteObject.setLogger(this.logger);
-      remoteObject.setAcl(acl);
-      remoteObject.initRouter(this.router);
+    var remoteObjectType = null;
+    var remoteObjectName = null;
+    var remoteObject = null;
+    if (config.object) {
+      remoteObject = config.object;
+    } else if (config.service) {
+      remoteObjectType = 'service';
+      remoteObjectName = config.service;
+      remoteObject = this.modelManager.services[remoteObjectName];
+    } else if (config.repo) {
+      remoteObjectType = 'repo';
+      remoteObjectName = config.repo;
+      remoteObject = this.modelManager.repos[remoteObjectName];
     }
+
+    var defaultPathParts = [remoteObjectType];
+    if (remoteObjectName) {
+      defaultPathParts.push(
+        camelToKebab(defaultPathParts)
+      );
+    }
+
+    var path = config.path != null 
+      ? config.path 
+      : defaultPathParts.join('/');
+
+    var enable = config.enable ? config.enable : {};
+    var aclConfig = config.acl ? config.acl : {};
+    var endpointsDisable = config.disable ? config.disable : {};
+    var endpointDisableGroup = config.disableGroup ? config.disableGroup : {};
+    var endpoints = config.endpoints ? config.endpoints : {};
+
+    if (!enable) return;
+    
+    // Remove any endpoints that have been disabled
+    for (var endpointName in endpoints) {
+      var groups = endpoints[endpointName].groups;
+      if (Array.isArray(groups)) {
+        groups.forEach(function(group){
+          if (endpoints[endpointName] && endpointDisableGroup[group] == true) {
+            delete endpoints[endpointName]
+          }
+        });
+      }
+      if (endpoints[endpointName] && endpointsDisable[endpointName] == true) {
+        delete endpoints[endpointName];
+      }
+    }
+
+      // This service has no end points - nothing more to do
+    if (Object.keys(endpoints).length == 0) return;
+
+    var acl = new ServerAcl({
+      rules: aclConfig.rules,
+      endpoints
+    });
+    acl.loadDefaultRoleAssessors();
+    acl.setRepos(this.modelManager.repos);
+    for (var role in this.aclRoleAssessor) {
+      acl.addRoleAssessor(this.aclRoleAssessor[role]);
+    }
+
+    var remote = new ServerRemoteObject(
+      remoteObject, 
+      {
+        path, 
+        endpoints,
+        server: this.config
+      }
+    );
+    remote.setLogger(this.logger);
+    remote.setAcl(acl);
+    remote.initRouter(this.router);
   }
   
   async start()

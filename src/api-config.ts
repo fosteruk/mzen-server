@@ -59,12 +59,13 @@ export interface ServerApiConfigEndpoint
 
 export interface ServerApiConfig
 {
+  object?: any;
+  repo?: string;
+  service?: string;
   enable?: boolean;
   path?: string|null;
-  endpoint?: {
-    disable?: {[key: string]: boolean},
-    disableGroup?: {default?: boolean, [key: string]: boolean}
-  };
+  disable?: {[key: string]: boolean};
+  disableGroup?: {default?: boolean, [key: string]: boolean};
   acl?: ServerApiConfigAcl;
   maxResults?: number;
   endpoints?: {[key: string]: ServerApiConfigEndpoint};
