@@ -173,7 +173,7 @@ export class Server
     var defaultPathParts = [remoteObjectType];
     if (remoteObjectName) {
       defaultPathParts.push(
-        camelToKebab(defaultPathParts)
+        camelToKebab(remoteObjectName)
       );
     }
 
