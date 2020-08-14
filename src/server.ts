@@ -78,7 +78,7 @@ export class Server
 
       await this.runInitialisers('02-resources-loaded');
 
-      await this.registerEndpoints();
+      this.registerEndpoints();
       await this.runInitialisers('03-endpoints-registered');
 
       this.app.use(this.config.path, this.router);
@@ -179,7 +179,7 @@ export class Server
 
     var path = config.path != null 
       ? config.path 
-      : defaultPathParts.join('/');
+      : '/' + defaultPathParts.join('/');
 
     var enable = config.enable ? config.enable : {};
     var aclConfig = config.acl ? config.acl : {};
