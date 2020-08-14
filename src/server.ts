@@ -50,6 +50,7 @@ export class Server
       ? modelManager 
       : new ModelManager(this.config.model ? this.config.model : undefined);
 
+    this.apiConfigs = [];
     this.app = express();
     this.server = null;
     this.router = express.Router();
