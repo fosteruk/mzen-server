@@ -155,31 +155,21 @@ export class Server
 
   registerEndpointsConfig(config:ServerApiConfig)
   {
-    var remoteObjectType = null;
     var remoteObjectName = null;
     var remoteObject = null;
     if (config.object) {
       remoteObject = config.object;
     } else if (config.service) {
-      remoteObjectType = 'service';
       remoteObjectName = config.service;
       remoteObject = this.modelManager.services[remoteObjectName];
     } else if (config.repo) {
-      remoteObjectType = 'repo';
       remoteObjectName = config.repo;
       remoteObject = this.modelManager.repos[remoteObjectName];
     }
 
-    var defaultPathParts = [remoteObjectType];
-    if (remoteObjectName) {
-      defaultPathParts.push(
-        camelToKebab(remoteObjectName)
-      );
-    }
-
     var path = config.path != null 
       ? config.path 
-      : '/' + defaultPathParts.join('/');
+      : '/' + camelToKebab(remoteObjectName);
 
     var enable = config.enable ? config.enable : {};
     var aclConfig = config.acl ? config.acl : {};
