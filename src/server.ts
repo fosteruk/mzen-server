@@ -245,7 +245,7 @@ export class Server
 
 function camelToKebab(input)
 {
-  return input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  return input ? input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() : '';
 }
 
 export default Server;
