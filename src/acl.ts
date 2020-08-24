@@ -72,8 +72,8 @@ export class ServerAcl
     var rules = this.getRules(endpointName);
 
     // We need to execute hasRole() for each rule in sequence so we will start with a resolved promise
-    // By default everything is permitted so we resolve true
-    var promise = Promise.resolve(true);
+    // By default nothing is permitted so we resolve false
+    var promise = Promise.resolve(false);
     rules.forEach((rule) => {
       // Each rule applies only the specified role
       // To test if a given rule will permit or deny the user we need to check two things
@@ -85,24 +85,26 @@ export class ServerAcl
           // If the user does not have the role then we dont modify the permitted value
           // - we would return the initResult, so we can default to that value
           var result = initResult;
-          var initConditions = (typeof initResult == 'object') ? initResult : null;
-          if (typeof userHasRole == 'object') {
-            // An object was returned - this represents the conditions under which the user has the role
-            if (initConditions) {
-              // If we already had role ownership conditions we need to merge the new conditions
-              for (var condition in userHasRole) {
-                initConditions[condition] = userHasRole[condition];
+          if (!!userHasRole) {
+            var initConditions = (typeof initResult == 'object') ? initResult : null;
+            if (typeof userHasRole == 'object') {
+              // An object was returned - this represents the conditions under which the user has the role
+              if (initConditions) {
+                // If we already had role ownership conditions we need to merge the new conditions
+                for (var condition in userHasRole) {
+                  initConditions[condition] = userHasRole[condition];
+                }
+                result = initConditions;
+              } else {
+                result = userHasRole;
               }
-              result = initConditions;
-            } else {
-              result = userHasRole;
-            }
-          } else if (userHasRole === true) {
-            if (initConditions) {
-              // The previous role assessor returned conditions - these still apply so we return them
-              result = initConditions;
-            } else {
-              result = rule.allow !== undefined ? rule.allow : true;
+            } else if (userHasRole === true) {
+              if (initConditions) {
+                // The previous role assessor returned conditions - these still apply so we return them
+                result = initConditions;
+              } else {
+                result = rule.allow !== undefined ? rule.allow : true;
+              }
             }
           }
           return result;
