@@ -19,6 +19,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -60,6 +63,9 @@ describe('ServerRemoteObject', function(){
     it('generates middleware array ordered by priority', function(){
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'a': {
             path: '/a',
@@ -106,6 +112,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -138,6 +147,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -167,6 +179,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -196,6 +211,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-byPkey': {
             path: '/:pkey',
@@ -225,6 +243,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-all': {
             path: '/all',
@@ -254,6 +275,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-all': {
             path: '/all',
@@ -283,6 +307,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-all': {
             path: '/all',
@@ -312,6 +339,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-all': {
             path: '/all',
@@ -342,6 +372,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-all': {
             path: '/all',
@@ -374,6 +407,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-all': {
             path: '/all',
@@ -412,6 +448,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -439,6 +478,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -468,6 +510,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'get-all': {
             path: '/all',
@@ -500,6 +545,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -570,6 +618,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -617,6 +668,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -657,6 +711,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -697,6 +754,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',
@@ -726,6 +786,9 @@ describe('ServerRemoteObject', function(){
 
       var config = {
         path: '/api',
+        acl: {
+          rules: [{allow: true, role: 'all'}]
+        },
         endpoints: {
           'post-save': {
             path: '/save',

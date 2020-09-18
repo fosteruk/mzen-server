@@ -1,5 +1,5 @@
 import ServerAcl from './acl';
-import { ServerConfig } from './server';
+import { ServerConfig } from './server-config';
 import { 
   Schema, 
   SchemaValidationResult, 
@@ -49,7 +49,10 @@ export class ServerRemoteObject
       ? this.config.server : {};
 
     this.object = object;
-    this.acl = new ServerAcl;
+    this.acl = new ServerAcl({
+      rules: this.config.acl.rules,
+      endpoints: this.config.endpoints
+    });
     this.setLogger(console);
   }
   
@@ -149,7 +152,7 @@ export class ServerRemoteObject
           }
 
           try {
-            await this.acl.populateContext(req, aclContext);
+            await this.acl.populateContext(req, aclContext, this);
             const isPermitted = await this.acl.isPermitted(endpointName, aclContext);
             if (isPermitted === false) {
               throw new ServerErrorUnauthorized;

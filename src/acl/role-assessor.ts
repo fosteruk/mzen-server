@@ -1,7 +1,7 @@
 export class ServerAclRoleAssessor 
 {
   role:string;
-  repos:{[key: string]: any};
+  repos:{[key:string]:any};
   priority:number;
   
   constructor(role?)
@@ -11,13 +11,11 @@ export class ServerAclRoleAssessor
     this.priority = 0;
   }
   
-  // @ts-ignore - 'request' is declared but its value is never read
-  async initContext(request, context?): Promise<any>
+  async initContext(_request, _context?, _remoteObject?):Promise<any>
   {
   }
   
-  // @ts-ignore - 'user' is declared but its value is never read. 
-  async hasRole(context): Promise<any | boolean>
+  async hasRole(_context):Promise<any|boolean>
   {
     return Promise.resolve(true);
   }

@@ -1,10 +1,12 @@
 import { 
-  ModelManager, 
-  ModelManagerConfig 
+  ModelManager
 } from 'mzen';
 import { 
   ServerRemoteObject
 } from './remote-object';
+import { 
+  ServerConfig
+} from './server-config';
 import { 
   ServerApiConfig
 } from './api-config';
@@ -13,15 +15,6 @@ import ServerAclRoleAssessor from './acl/role-assessor';
 import Http = require('http');
 import express = require('express');
 import path = require('path');
-
-export interface ServerConfig
-{
-  path?: string;
-  port?: number;
-  appDir?: string;
-  model?: ModelManagerConfig; 
-  [key: string]: any; // Any custom config options
-}
 
 export class Server
 {

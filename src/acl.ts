@@ -3,30 +3,31 @@ import RoleAssessorAll from './acl/role-assessor/all';
 
 export interface ServerAclConfigRule
 {
-  allow?: boolean; 
-  role?: string;
+  allow?:boolean; 
+  role?:string;
 }
 
 export interface ServerAclConfig
 {
-  rules?: Array<ServerAclConfigRule>;
-  endpoints?: any;
+  rules?:Array<ServerAclConfigRule>;
+  endpoints?:any;
 }
 
 export class ServerAcl
 {
-  config: ServerAclConfig;
-  roleAssessor: {[key: string]: ServerAclRoleAssessor};
-  initcontextGroups: {[key: number]: [ServerAclRoleAssessor]};
-  repos: {[key: string]: any};
+  config:ServerAclConfig;
+  roleAssessor:{[key:string]:ServerAclRoleAssessor};
+  initcontextGroups:{[key: number]:[ServerAclRoleAssessor]};
+  repos:{[key:string]:any};
   
-  constructor(options?: ServerAclConfig)
+  constructor(options?:ServerAclConfig)
   {
     this.config = options ? options : {};
     this.config.rules = this.config.rules ? this.config.rules : [];
     this.config.endpoints = this.config.endpoints ? this.config.endpoints : {};
 
     this.roleAssessor = {};
+    this.loadDefaultRoleAssessors();
   }
   
   loadDefaultRoleAssessors()
@@ -34,7 +35,7 @@ export class ServerAcl
     this.addRoleAssessor(new RoleAssessorAll);
   }
   
-  async populateContext(request, context?)
+  async populateContext(request, context?, remoteObject?)
   {
     // Initialise assessors in order of priority
     const roleAssessors = Object.values(this.roleAssessor);
@@ -56,7 +57,7 @@ export class ServerAcl
     // Execute init context groups in order
     for (const group of roleAssessorsGrouped) {
       await Promise.all(group.map(
-        roleAssessor => roleAssessor.initContext(request, context)
+        roleAssessor => roleAssessor.initContext(request, context, remoteObject)
       ));
     }
 
